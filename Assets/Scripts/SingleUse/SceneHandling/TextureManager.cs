@@ -15,7 +15,7 @@ public class TextureManager : MonoBehaviour
     int currentMemoryUsage = 0;
 
 
-    public IEnumerator LoadAllTextures(List<string> texturePaths, Action onComplete = null)
+    public IEnumerator LoadAllTextures(List<string> texturePaths, Loader loadingBar, Action onComplete = null)
     {
         textureCache.Clear();
         lruList.Clear();
@@ -29,12 +29,13 @@ public class TextureManager : MonoBehaviour
             }
             var texturePath = texturePaths[i];
 
-            float progressFull = texturePaths.Count;
-            if (maxTexturesToKeep < texturePaths.Count)
+            int max = texturePaths.Count;
+            if (maxTexturesToKeep < max)
             {
-                progressFull = maxTexturesToKeep;
+                max = maxTexturesToKeep;
             }
-            progressLoader.UpdateBar((i + 1) / progressFull, Path.GetFileName(texturePath));
+            string fileName = Path.GetFileName(texturePath);
+            loadingBar.UpdateLoader((float)i / (max - 1), "Textur \"" + fileName + "\" wird geladen...");
 
             yield return StartCoroutine(LoadTextureWithEviction(texturePath, null));
         }
@@ -49,7 +50,6 @@ public class TextureManager : MonoBehaviour
         {
             lruList.Remove(filePath);
             lruList.AddFirst(filePath);
-
             onLoaded?.Invoke(cachedTexture);
         }
         else

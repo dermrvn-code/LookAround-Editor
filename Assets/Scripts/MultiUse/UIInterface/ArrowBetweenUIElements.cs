@@ -4,15 +4,18 @@ using UnityEngine.UI;
 public class ArrowBetweenUIElements : MonoBehaviour
 {
 
-    public Image arrowHeadImage; // Drag an arrowhead sprite here
+    public Image arrowHeadImage;
+    public Image arrowHeadImage2;
     public float arrowHeadSize = 20f;
     public float arrowHeadOffsetRotation = 90f; // Rotation offset for the arrowhead
 
 
     public RectTransform from;
     public RectTransform to;
-    public Image arrowImage; // A thin Image with pivot at (0, 0.5)
+    public Image arrowImage;
     public float lineWidth = 4f;
+
+    public bool arrowsOnBothSides = false;
 
     private RectTransform arrowRect;
 
@@ -37,7 +40,6 @@ public class ArrowBetweenUIElements : MonoBehaviour
         arrowRect.position = fromPoint;
         arrowRect.rotation = Quaternion.Euler(0, 0, angle);
 
-        // Place arrowhead at end
         if (arrowHeadImage != null)
         {
             arrowHeadImage.rectTransform.position = toPoint - direction.normalized * (arrowHeadSize / 2);
@@ -45,6 +47,20 @@ public class ArrowBetweenUIElements : MonoBehaviour
             arrowHeadImage.rectTransform.sizeDelta = new Vector2(arrowHeadSize, arrowHeadSize);
         }
 
+        if (arrowsOnBothSides)
+        {
+            if (arrowHeadImage2 != null)
+            {
+                arrowHeadImage2.gameObject.SetActive(true);
+                arrowHeadImage2.rectTransform.position = fromPoint + direction.normalized * (arrowHeadSize / 2);
+                arrowHeadImage2.rectTransform.rotation = Quaternion.Euler(0, 0, angle + arrowHeadOffsetRotation + 180);
+                arrowHeadImage2.rectTransform.sizeDelta = new Vector2(arrowHeadSize, arrowHeadSize);
+            }
+        }
+        else
+        {
+            arrowHeadImage2.gameObject.SetActive(false);
+        }
     }
 
     Vector3 GetClosestEdgePoint(RectTransform from, Vector3 toPosition)

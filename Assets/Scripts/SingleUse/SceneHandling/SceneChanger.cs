@@ -9,6 +9,10 @@ using UnityEngine.Video;
 
 public class SceneChanger : MonoBehaviour
 {
+    public TMP_Text sceneNameText;
+    public GameObject particlesGameobject;
+    ParticleSystem particles;
+
     public MeshRenderer domeRenderer;
 
     public Material videoMaterial;
@@ -30,6 +34,10 @@ public class SceneChanger : MonoBehaviour
         sm = FindObjectOfType<SceneManager>();
         ih = FindObjectOfType<InteractionHandler>();
         textureManager = FindObjectOfType<TextureManager>();
+
+        // To prevent particles in the editor window
+        particlesGameobject.SetActive(true);
+        particles = particlesGameobject.GetComponent<ParticleSystem>();
     }
 
     public void Quit()
@@ -43,21 +51,6 @@ public class SceneChanger : MonoBehaviour
         photoMaterial.mainTextureOffset = new Vector2(0, 0);
 
         SwitchToFoto();
-    }
-
-    public void LoadWorld()
-    {
-        SceneManager.worldsList.TryGetValue(SceneManager.currentWorld, out string path);
-        if (path == "")
-        {
-            Debug.LogWarning("The current world is not in the worlds list");
-            return;
-        }
-        // sm.LoadSceneOverview(path, () =>
-        // {
-        //     Debug.Log("Loading World: " + path);
-        //     ToStartScene();
-        // });
     }
 
     public void ToStartScene(bool animate = true)
@@ -128,6 +121,7 @@ public class SceneChanger : MonoBehaviour
                     SwitchToVideo();
                     videoMaterial.mainTextureOffset = new Vector2(scene.XOffset, scene.YOffset);
                     vp.url = scene.Source;
+                    sceneNameText.text = scene.Name;
                     onLoaded?.Invoke();
                 }
                 else if (scene.Type == Scene.MediaType.Photo)
@@ -137,6 +131,7 @@ public class SceneChanger : MonoBehaviour
                         photoMaterial.mainTexture = texture;
                         photoMaterial.mainTextureOffset = new Vector2(scene.XOffset, scene.YOffset);
                         SwitchToFoto();
+                        sceneNameText.text = scene.Name;
                         onLoaded?.Invoke();
                     }));
                 }
@@ -299,6 +294,7 @@ public class SceneChanger : MonoBehaviour
 
     private IEnumerator _StartParticles(Action<Action> sceneLoaded)
     {
+        particles.Play();
         yield return new WaitForSeconds(2f);
         sceneLoaded.Invoke(() =>
         {
@@ -310,5 +306,6 @@ public class SceneChanger : MonoBehaviour
     private IEnumerator _StopParticles()
     {
         yield return new WaitForSeconds(0.5f);
+        particles.Stop();
     }
 }

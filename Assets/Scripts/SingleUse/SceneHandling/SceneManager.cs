@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using TMPro;
 using UnityEngine;
 
 public class SceneManager : MonoBehaviour
@@ -11,7 +12,6 @@ public class SceneManager : MonoBehaviour
     SceneChanger sc;
     TextureManager textureManager;
 
-    XDocument worldOverview;
     XDocument sceneOverview;
 
     public Dictionary<string, Scene> sceneList = new Dictionary<string, Scene>();
@@ -21,103 +21,56 @@ public class SceneManager : MonoBehaviour
         sc = FindObjectOfType<SceneChanger>();
         textureManager = FindObjectOfType<TextureManager>();
 
-        if (isSceneBuilder()) return;
         sc.ToMainScene();
-
-
-        // bool isLoaded = LoadWorldOverview();
-
-        // if (!isLoaded)
-        // {
-        //     Debug.LogWarning("The world overview file is not valid");
-        //     return;
-        // }
-        // Debug.Log("World overview loaded!");
     }
-
-    public static bool isSceneBuilder()
-    {
-        return UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "SceneBuilder";
-    }
-
-
-    public static Dictionary<string, string> worldsList = new Dictionary<string, string>();
-    public static string currentWorld = "";
-    // bool LoadWorldOverview()
-    // {
-    //     if (!File.Exists(Settings.worldsOverviewFile)) return false;
-    //     worldOverview = XDocument.Load(Settings.worldsOverviewFile);
-    //     var worlds = worldOverview.Descendants("World");
-
-    //     worldsList = new Dictionary<string, string>();
-    //     // Loop through every Scene
-    //     foreach (var world in worlds)
-    //     {
-    //         string path = world.Attribute("path").Value;
-    //         string name = world.Attribute("name").Value;
-
-    //         worldsList.Add(name, path);
-    //     }
-    //     if (currentWorld == "") currentWorld = worldsList.First().Key;
-    //     settings.PopulateWorldDropdown();
-    //     return true;
-    // }
 
     List<string> texturePaths;
-    string currentSceneOverviewPath;
-    // public void LoadSceneOverview(string path, Action onComplete)
-    // {
-    //     if (currentSceneOverviewPath == path)
-    //     {
-    //         sc.ToStartScene();
-    //         return;
-    //     }
-    //     currentSceneOverviewPath = path;
-    //     texturePaths = new List<string>();
-    //     textureManager.ReleaseAllTextures();
+    public void LoadSceneOverview(string sceneOverviewPath, Loader loadingBar, Action onComplete)
+    {
+        texturePaths = new List<string>();
+        textureManager.ReleaseAllTextures();
 
-    //     sceneList = new Dictionary<string, Scene>();
-    //     string mainFolder = Path.GetDirectoryName(Settings.worldsOverviewFile);
-    //     string sceneOverviewPath = Path.Combine(mainFolder, path);
-    //     if (!File.Exists(sceneOverviewPath)) Debug.LogWarning("The scene overview file does not exist: " + sceneOverviewPath);
-    //     sceneOverview = XDocument.Load(sceneOverviewPath);
-    //     var scenes = sceneOverview.Descendants("Scene");
+        sceneList = new Dictionary<string, Scene>();
+        if (!File.Exists(sceneOverviewPath)) Debug.LogWarning("The scene overview file does not exist: " + sceneOverviewPath);
+        sceneOverview = XDocument.Load(sceneOverviewPath);
+        var scenes = sceneOverview.Descendants("Scene");
 
-    //     int counter = 0;
-    //     foreach (var scene in scenes)
-    //     {
-    //         string scenePath = scene.Attribute("path").Value;
-    //         string sceneName = scene.Attribute("name").Value;
+        int counter = 0;
+        foreach (var scene in scenes)
+        {
+            string scenePath = scene.Attribute("path").Value;
+            string sceneName = scene.Attribute("name").Value;
 
-    //         var startScene = scene.Attribute("startScene");
-    //         bool isStartScene = false;
-    //         if (startScene != null)
-    //         {
-    //             if (startScene.Value.ToLower() == "true") isStartScene = true;
-    //         }
+            var startScene = scene.Attribute("startScene");
+            bool isStartScene = false;
+            if (startScene != null)
+            {
+                if (startScene.Value.ToLower() == "true") isStartScene = true;
+            }
 
-    //         string sceneFolder = Path.GetDirectoryName(sceneOverviewPath);
-    //         Scene s = LoadScene(sceneName, sceneFolder, scenePath, isStartScene);
+            string sceneFolder = Path.GetDirectoryName(sceneOverviewPath);
+            Scene s = LoadScene(sceneName, sceneFolder, scenePath, isStartScene);
 
-    //         if (s.Type != Scene.MediaType.Photo) return;
+            if (s.Type != Scene.MediaType.Photo) return;
 
-    //         if (s.IsStartScene)
-    //         {
-    //             texturePaths.Insert(0, s.Source);
-    //         }
-    //         else
-    //         {
-    //             texturePaths.Add(s.Source);
-    //         }
-    //         counter++;
-    //     }
+            if (s.IsStartScene)
+            {
+                texturePaths.Insert(0, s.Source);
+            }
+            else
+            {
+                texturePaths.Add(s.Source);
+            }
 
-    //     StartCoroutine(textureManager.LoadAllTextures(texturePaths, () =>
-    //     {
-    //         Debug.Log("Textures preloaded!");
-    //         onComplete?.Invoke();
-    //     }));
-    // }
+            counter++;
+        }
+
+        StartCoroutine(textureManager.LoadAllTextures(texturePaths, loadingBar, () =>
+        {
+            Debug.Log("Textures preloaded!");
+            onComplete?.Invoke();
+        }));
+    }
 
     Scene LoadScene(string sceneName, string mainFolder, string scenePath, bool isStartScene)
     {
