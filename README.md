@@ -11,7 +11,7 @@ The project spans across three repositories:
 
 - _The Software repository_: [[LookAround-Software]](https://github.com/dermrvn-code/LookAround-Software)
 - _The Hardware repository_: [[LookAround-Hardware]](https://github.com/dermrvn-code/LookAround-Hardware)
-- _The Editor repository (this repo)_: [[LookAround-Editor]](https://github.com/dermrvn-code/LookAround-Editor)
+- _<b>The Editor repository</b>_: [[LookAround-Editor]](https://github.com/dermrvn-code/LookAround-Editor)
 
 For a more detailed overview of the project, please visit [the project page](https://dermrvn-code.github.io/LookAround/)
 
