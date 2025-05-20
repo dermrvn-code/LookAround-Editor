@@ -27,8 +27,11 @@ public class UIReorderableItem : MonoBehaviour, IBeginDragHandler, IDragHandler,
         placeholder = new GameObject("Placeholder");
         var layout = placeholder.AddComponent<LayoutElement>();
         var thisLayout = GetComponent<LayoutElement>();
-        layout.preferredWidth = thisLayout.preferredWidth;
-        layout.preferredHeight = thisLayout.preferredHeight;
+        if (thisLayout != null)
+        {
+            layout.preferredWidth = thisLayout.preferredWidth;
+            layout.preferredHeight = thisLayout.preferredHeight;
+        }
         layout.flexibleWidth = 0;
         layout.flexibleHeight = 0;
 

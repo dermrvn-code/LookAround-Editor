@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PanelManager : MonoBehaviour
 {
@@ -15,27 +16,73 @@ public class PanelManager : MonoBehaviour
 
     void Start()
     {
-        dome.SetActive(true);
-        topBar.SetActive(true);
-        graphPanel.SetActive(false);
-        bottomBar.SetActive(true);
-        sideBar.SetActive(true);
+        DomeSetActive(true);
+        TopBarSetActive(true);
+        BottomBarSetActive(true);
+        GraphSetActive(false);
+        SidebarSetActive(false);
+    }
+
+    public void TopBarSetActive(bool isActive)
+    {
+        if (topBar != null)
+        {
+            topBar.SetActive(isActive);
+        }
+    }
+    public void BottomBarSetActive(bool isActive)
+    {
+        if (bottomBar != null)
+        {
+            bottomBar.SetActive(isActive);
+        }
+    }
+    public void DomeSetActive(bool isActive)
+    {
+        if (dome != null)
+        {
+            dome.SetActive(isActive);
+        }
+    }
+
+    public void GraphSetActive(bool isActive)
+    {
+        if (graphPanel != null)
+        {
+            foreach (Transform child in graphPanel.transform)
+            {
+                child.gameObject.SetActive(isActive);
+            }
+            Image image = graphPanel.GetComponent<Image>();
+            if (image != null)
+            {
+                image.enabled = isActive;
+            }
+        }
+    }
+
+    public void SidebarSetActive(bool isActive, GameObject element = null)
+    {
+        if (sideBar != null)
+        {
+            sideBar.SetActive(isActive);
+        }
     }
 
     public void SwitchToGraphPanel()
     {
-        bottomBar.SetActive(false);
-        sideBar.SetActive(false);
-        dome.SetActive(false);
-        graphPanel.SetActive(true);
+        BottomBarSetActive(false);
+        SidebarSetActive(false);
+        DomeSetActive(false);
+        GraphSetActive(true);
     }
 
     public void SwitchToScene()
     {
-        bottomBar.SetActive(true);
-        sideBar.SetActive(true);
-        dome.SetActive(true);
-        graphPanel.SetActive(false);
+        BottomBarSetActive(true);
+        SidebarSetActive(false);
+        DomeSetActive(true);
+        GraphSetActive(false);
     }
 
 
