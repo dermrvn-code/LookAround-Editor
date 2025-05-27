@@ -5,10 +5,13 @@ using UnityEngine.EventSystems;
 public class UIDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [SerializeField] private Canvas canvas;
+    [SerializeField] private UIDropZone dropLayer;
     private GameObject dragClone;
+
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        dropLayer.gameObject.SetActive(true);
         dragClone = Instantiate(gameObject, canvas.transform);
         dragClone.transform.SetAsLastSibling();
     }
@@ -63,5 +66,6 @@ public class UIDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
 
         Destroy(dragClone);
         dragClone = null;
+        dropLayer.gameObject.SetActive(false);
     }
 }

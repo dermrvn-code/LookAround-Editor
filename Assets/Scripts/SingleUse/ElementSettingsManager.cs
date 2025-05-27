@@ -34,20 +34,30 @@ public class ElementsSettingManager : MonoBehaviour
         }
     }
 
-    void Deselect()
+    public void Deselect(bool closeSidebar = false)
     {
         selectedElement = null;
         if (selector != null)
         {
             selector.gameObject.SetActive(false);
         }
-        panelManager.SidebarSetActive(false);
+
+        if (closeSidebar)
+        {
+            panelManager.CloseSidebar();
+        }
     }
 
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
+            if (UnityEngine.EventSystems.EventSystem.current != null &&
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
@@ -57,7 +67,7 @@ public class ElementsSettingManager : MonoBehaviour
             }
             else
             {
-                Deselect();
+                Deselect(true);
             }
         }
     }

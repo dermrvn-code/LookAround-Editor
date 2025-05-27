@@ -17,20 +17,24 @@ public class InputController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftArrow))
-            cam.LeftMove();
-        else if (Input.GetKey(KeyCode.RightArrow))
-            cam.RightMove();
+        // Only trigger input if not over a UI element
+        if (!UnityEngine.EventSystems.EventSystem.current || !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            if (Input.GetKey(KeyCode.LeftArrow))
+                cam.LeftMove();
+            else if (Input.GetKey(KeyCode.RightArrow))
+                cam.RightMove();
 
-        if (Input.GetKey(KeyCode.DownArrow))
-            cam.ZoomIn();
-        else if (Input.GetKey(KeyCode.UpArrow))
-            cam.ZoomOut();
+            if (Input.GetKey(KeyCode.DownArrow))
+                cam.ZoomIn();
+            else if (Input.GetKey(KeyCode.UpArrow))
+                cam.ZoomOut();
 
-        if (Input.GetKeyDown(KeyCode.Space))
-            interaction.Interact();
+            if (Input.GetKeyDown(KeyCode.Space))
+                interaction.Interact();
 
-        if (Input.GetKeyDown(KeyCode.H))
-            sc.ToStartScene();
+            if (Input.GetKeyDown(KeyCode.H))
+                sc.ToStartScene();
+        }
     }
 }

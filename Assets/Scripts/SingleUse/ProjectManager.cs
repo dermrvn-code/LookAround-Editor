@@ -84,7 +84,7 @@ public class ProjectManager : MonoBehaviour
     {
         StandaloneFileBrowser.OpenFilePanelAsync("Select Project Folder", projectsPath, "xml", false, (string[] paths) =>
         {
-            if (paths.Length > 0)
+            if (paths.Length == 1)
             {
                 LoadProject(paths[0]);
             }
