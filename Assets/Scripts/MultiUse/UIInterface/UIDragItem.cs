@@ -2,11 +2,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+
+public enum DragItemType
+{
+    Text,
+    Arrow,
+    Textbox
+}
 public class UIDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [SerializeField] private Canvas canvas;
     [SerializeField] private UIDropZone dropLayer;
     private GameObject dragClone;
+
+    public DragItemType itemType;
 
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -61,7 +70,10 @@ public class UIDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         {
             var dropZone = result.gameObject.GetComponent<UIDropZone>();
             if (dropZone != null)
-                dropZone.OnItemDropped(dragClone);
+            {
+                var dragItem = dragClone.GetComponent<UIDragItem>();
+                dropZone.OnItemDropped(dragItem);
+            }
         }
 
         Destroy(dragClone);

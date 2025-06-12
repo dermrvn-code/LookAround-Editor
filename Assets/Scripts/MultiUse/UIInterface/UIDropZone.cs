@@ -4,9 +4,17 @@ public class UIDropZone : MonoBehaviour
 {
     [SerializeField] private GameObject hint;
 
+    Camera cam;
+    ElementInitManager elementInitManager;
+    SceneChanger sceneChanger;
+    InteractionHandler interactionHandler;
     private void Start()
     {
         SetHintActive(false);
+        cam = FindObjectOfType<Camera>();
+        elementInitManager = FindObjectOfType<ElementInitManager>();
+        sceneChanger = FindObjectOfType<SceneChanger>();
+        interactionHandler = FindObjectOfType<InteractionHandler>();
     }
 
     public void OnHoverEnter()
@@ -19,7 +27,7 @@ public class UIDropZone : MonoBehaviour
         SetHintActive(false);
     }
 
-    public void OnItemDropped(GameObject droppedItem)
+    public void OnItemDropped(UIDragItem droppedItem)
     {
         HandleItemDropped(droppedItem);
         SetHintActive(false);
@@ -31,9 +39,32 @@ public class UIDropZone : MonoBehaviour
             hint.SetActive(isActive);
     }
 
-    private void HandleItemDropped(GameObject droppedItem)
+    private void HandleItemDropped(UIDragItem droppedItem)
     {
-        Debug.Log($"Item dropped on {gameObject.name}: {droppedItem.name}");
-        // Add item drop logic here
+        if (sceneChanger.currentScene == null)
+        {
+            InfoText.ShowInfo("Elemente können nur in validen Szenen platziert werden.");
+            return;
+        }
+
+        float pos = cam.transform.eulerAngles.y;
+        switch (droppedItem.itemType)
+        {
+            case DragItemType.Text:
+                elementInitManager.InitText(pos);
+                break;
+            case DragItemType.Arrow:
+                elementInitManager.InitArrow(pos);
+                break;
+            case DragItemType.Textbox:
+                elementInitManager.InitTextbox(pos);
+                break;
+            default:
+                Debug.LogWarning("Unknown item type dropped");
+                break;
+        }
+
+        interactionHandler.UpdateElements();
+
     }
 }

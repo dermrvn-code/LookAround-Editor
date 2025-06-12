@@ -119,7 +119,6 @@ public class TextBox : Hoverable
 
     IEnumerator Open()
     {
-        Debug.Log("Fade from " + textColor + " to " + TransparentColor(textColor));
         StartCoroutine(Fade(icon, textColor, TransparentColor(textColor), true));
         StartCoroutine(Scale(background.transform, closedScale, backgroundScale));
         yield return new WaitForSeconds(100 * 0.005f);
@@ -131,7 +130,6 @@ public class TextBox : Hoverable
 
     IEnumerator Close()
     {
-        Debug.Log("Fade from " + textColor + " to " + TransparentColor(textColor));
         StartCoroutine(Fade(tmptext, textColor, TransparentColor(textColor)));
         yield return new WaitForSeconds(100 * 0.005f);
         if (stayClosed)

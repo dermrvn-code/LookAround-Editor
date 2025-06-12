@@ -21,7 +21,7 @@ public class InteractionHandler : MonoBehaviour
         eyesHandler = GetComponent<CameraHandler>();
     }
 
-    void UpdateElements()
+    public void UpdateElements()
     {
         updateElementsNextFrame = false;
         elements = new Dictionary<DomePosition, Hoverable>();

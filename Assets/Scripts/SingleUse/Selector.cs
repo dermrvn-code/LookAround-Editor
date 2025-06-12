@@ -66,8 +66,8 @@ public class Selector : MonoBehaviour
             }
 
             Vector3 selectorScale = transform.localScale;
-            selectorScale.x = size.x * 1.1f; // Scale up the selector slightly
-            selectorScale.y = size.x * 1.1f; // Scale up the selector slightly
+            selectorScale.x = size.x * 1.2f;
+            selectorScale.y = size.x * 1.2f;
 
             transform.localScale = selectorScale;
             pos.position = targetPosition.position;
