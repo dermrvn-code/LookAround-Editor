@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8981634258157351342}
   - component: {fileID: 8250442890953714212}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: alert-circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 3453524359806634437}
   - component: {fileID: 1212589620443345445}
   - component: {fileID: 8623022219071775321}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: TextBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -151,9 +151,13 @@ MonoBehaviour:
   text: {fileID: 1134340416443874462}
   background: {fileID: 8027590173567883576}
   icon: {fileID: 8250442890953714212}
+  iconName: 
+  textContent: 
   closedScale: {x: 1, y: 1, z: 0.99}
   scale: {x: 6, y: 5}
   isOpen: 0
+  color: {r: 1, g: 1, b: 1, a: 1}
+  tmptext: {fileID: 0}
 --- !u!65 &8623022219071775321
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -187,7 +191,7 @@ GameObject:
   - component: {fileID: 8311779238899855268}
   - component: {fileID: 5292048930106492819}
   - component: {fileID: 2153384785864538778}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -226,7 +230,7 @@ MeshRenderer:
   m_GameObject: {fileID: 8027590173567883576}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
@@ -291,7 +295,7 @@ GameObject:
   - component: {fileID: 1134340416443874462}
   - component: {fileID: 6410051844757127410}
   - component: {fileID: 4516959303492012106}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}

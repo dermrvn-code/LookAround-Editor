@@ -98,8 +98,9 @@ public class SceneManager : MonoBehaviour
 
         var elements = sceneTag.Descendants("Element");
 
-        var sceneElements = new List<SceneElement>();
+        var sceneElements = new Dictionary<int, SceneElement>();
 
+        int idCounter = 0;
         foreach (var element in elements)
         {
             string elementType = element.Attribute("type").Value.ToLower();
@@ -173,8 +174,9 @@ public class SceneManager : MonoBehaviour
             }
             if (se != null)
             {
-                sceneElements.Add(se);
+                sceneElements.Add(idCounter, se);
             }
+            idCounter++;
         }
         Scene sceneObj = new Scene(type == "video" ? Scene.MediaType.Video : Scene.MediaType.Photo, sceneName, source, sceneElements, isStartScene, xOffset, yOffset);
 

@@ -13,23 +13,28 @@ public class InteractableArrow : Interactable
 
 
     public Color color;
-
-    [SerializeField]
-    Color hoverColor;
+    public Color hoverColor;
+    public int rotation = 0;
 
     public override void Setup()
     {
         anim = GetComponentInChildren<Animation>();
         mat = GetComponentInChildren<MeshRenderer>().material;
-        mat.color = color;
-
-        // Maker hoverColor a bit brighter than color
-        hoverColor = new Color(color.r * 2f, color.g * 2f, color.b * 2f, color.a);
+        SetColor(color);
     }
 
     public void SetRotation(int rotation)
     {
-        arrow.transform.Rotate(0, rotation, 0);
+        arrow.transform.localRotation = Quaternion.Euler(0, rotation, 0);
+        this.rotation = rotation;
+
+    }
+
+    public void SetColor(Color newColor)
+    {
+        color = newColor;
+        mat.color = color;
+        hoverColor = new Color(color.r * 2f, color.g * 2f, color.b * 2f, color.a);
     }
 
     public override void Highlight()

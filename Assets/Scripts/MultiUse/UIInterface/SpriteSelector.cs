@@ -6,13 +6,6 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 
-[System.Serializable]
-public class Element
-{
-    public string value;
-    public Sprite sprite;
-}
-
 public class SpriteSelector : MonoBehaviour
 {
 
@@ -22,17 +15,22 @@ public class SpriteSelector : MonoBehaviour
     public GameObject item;
     public string labelText;
 
-    public Element[] elementsList;
+    public Pairs.SpritePair[] elementsList;
 
     private GameObject currentCheck;
-    private Vector3 checkPosition;
 
     public UnityEvent<string> OnElementSelected = new UnityEvent<string>();
 
-    void Start()
+
+    public void Initialize(Pairs.SpritePair[] _elementsList, string selectedValue, string label = "")
     {
-        checkPosition = check.transform.localPosition;
-        label.text = labelText;
+        if (label != "")
+        {
+            labelText = label;
+            this.label.text = label;
+        }
+        elementsList = _elementsList;
+
         for (int i = 0; i < elementsList.Length; i++)
         {
             string value = elementsList[i].value;
@@ -43,6 +41,11 @@ public class SpriteSelector : MonoBehaviour
 
             Button button = newItem.GetComponent<Button>();
             button.onClick.AddListener(() => SelectElement(value, newItem));
+
+            if (value == selectedValue)
+            {
+                SelectElement(value, newItem);
+            }
         }
     }
 
@@ -53,7 +56,6 @@ public class SpriteSelector : MonoBehaviour
             Destroy(currentCheck);
         }
         currentCheck = Instantiate(check, selectedItem.transform);
-        Debug.Log("Selected Element ID: " + value);
 
         OnElementSelected?.Invoke(value);
 

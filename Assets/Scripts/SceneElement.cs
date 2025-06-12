@@ -1,5 +1,6 @@
 public class SceneElement
 {
+    public int id;
     public enum ElementType { Text, DirectionArrow, Textbox };
     public ElementType type;
     public string text;

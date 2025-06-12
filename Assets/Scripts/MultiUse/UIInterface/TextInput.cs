@@ -19,4 +19,16 @@ public class TextInput : MonoBehaviour
     }
 
 
+    public void Initialize(string initialValue, string label = "")
+    {
+        if (label != "")
+        {
+            labelText = label;
+            this.label.text = label;
+        }
+
+        inputField.text = initialValue;
+    }
+
+
 }

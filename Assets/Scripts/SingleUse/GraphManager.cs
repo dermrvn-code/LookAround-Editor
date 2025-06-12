@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,8 +34,17 @@ public class GraphManager : MonoBehaviour
     public List<string[]> sceneConnections;
     public List<ArrowBetweenUIElements> connectionList;
 
+
     public void LoadGraph()
     {
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            var child = transform.GetChild(i).gameObject;
+            if (child.name != "Start" && child.name != "Close")
+            {
+                Destroy(child);
+            }
+        }
         sceneConnections = new List<string[]>();
         nodes = new Dictionary<string, GameObject>();
 
@@ -42,13 +52,16 @@ public class GraphManager : MonoBehaviour
 
         foreach (var scene in sceneManager.sceneList.Values)
         {
-            foreach (var element in scene.SceneElements)
+            foreach (var element in scene.SceneElements.Values)
             {
                 if (!string.IsNullOrEmpty(element.action))
                 {
-                    if (element.action.Contains("toScene"))
+                    string pattern = @"toScene\((.*?)\)";
+                    Match match = Regex.Match(element.action, pattern);
+                    if (match.Success)
                     {
-                        string sceneName = element.action.Replace("toScene(", "").Replace(")", "").Trim();
+                        string sceneName = match.Groups[1].Value; // Extrahiere den Parameter aus der ersten Grupp
+
                         sceneConnections.Add(new string[] { scene.Name, sceneName });
                     }
                 }
@@ -89,7 +102,6 @@ public class GraphManager : MonoBehaviour
             if ((connection.from.gameObject == from && connection.to.gameObject == to) ||
                 (connection.from.gameObject == to && connection.to.gameObject == from))
             {
-                Debug.Log("Connection already exists between " + from.name + " and " + to.name);
                 connection.arrowsOnBothSides = true;
                 return;
             }

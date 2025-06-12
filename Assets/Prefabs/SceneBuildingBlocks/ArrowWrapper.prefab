@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6850687753906096714}
   - component: {fileID: 7011297755261889822}
   - component: {fileID: 5956060792028284743}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ArrowWrapper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -68,6 +68,7 @@ MonoBehaviour:
   arrow: {fileID: 7512904860044761502}
   color: {r: 0, g: 0, b: 0, a: 1}
   hoverColor: {r: 1, g: 1, b: 1, a: 1}
+  rotation: 0
 --- !u!65 &5956060792028284743
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -87,8 +88,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.0798564, y: 0.16675203, z: 2.0491397}
-  m_Center: {x: 0.00032424927, y: -0.01234857, z: -0.00028455272}
+  m_Size: {x: 2, y: 2, z: 2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7512904860044761502
 GameObject:
   m_ObjectHideFlags: 0
@@ -100,7 +101,7 @@ GameObject:
   - component: {fileID: 8023401767655993288}
   - component: {fileID: 3047755992192756691}
   - component: {fileID: 8434611882954587543}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,7 +183,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5328057555095297056}
   - component: {fileID: 4705451599792943073}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: AnimationWrapper
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -7,15 +7,17 @@ using UnityEngine.UI;
 
 public class SliderAndInput : MonoBehaviour
 {
-    public float minValue = 0;
-    public float maxValue = 100;
-    public float defaultValue = 50;
+    public int minValue = 0;
+    public int maxValue = 100;
+    public int defaultValue = 50;
     public TMP_InputField inputField;
     public Slider slider;
     public TMP_Text label;
     public string labelText;
     public UnityEvent<float> OnValueChanged;
-    void Start()
+    public float value;
+
+    void Awake()
     {
         label.text = labelText;
         slider.minValue = minValue;
@@ -24,25 +26,26 @@ public class SliderAndInput : MonoBehaviour
         UpdateInputFieldValue(slider.value);
         slider.onValueChanged.AddListener(delegate { UpdateInputFieldValue(slider.value); });
         inputField.onValueChanged.AddListener(delegate { UpdateSliderValue(inputField.text); });
-        inputField.onEndEdit.AddListener(delegate { UpdateSliderValueOnEndEdit(); });
+        inputField.onEndEdit.AddListener(delegate { UpdateInputValueOnEndEdit(); });
     }
 
     void UpdateSliderValue(string value)
     {
-        float parsedValue = float.Parse(value);
-        if (parsedValue < slider.minValue)
+        int parsedValue = int.Parse(value);
+        if (parsedValue < minValue)
         {
-            parsedValue = slider.minValue;
+            parsedValue = minValue;
         }
-        else if (parsedValue > slider.maxValue)
+        else if (parsedValue > maxValue)
         {
-            parsedValue = slider.maxValue;
+            parsedValue = maxValue;
         }
+        this.value = parsedValue;
         slider.value = parsedValue;
         OnValueChanged?.Invoke(parsedValue);
     }
 
-    void UpdateSliderValueOnEndEdit()
+    void UpdateInputValueOnEndEdit()
     {
         inputField.text = slider.value.ToString();
     }
@@ -51,6 +54,28 @@ public class SliderAndInput : MonoBehaviour
     {
         inputField.text = value.ToString();
         OnValueChanged?.Invoke(value);
+        this.value = value;
+    }
+
+    public void Initialize(float value, string label = "", int minValue = 0, int maxValue = 100)
+    {
+        if(minValue != 0){
+            this.minValue = minValue;
+            slider.minValue = minValue;
+        }
+        if(maxValue != 100){        
+            this.maxValue = maxValue;
+            slider.maxValue = maxValue;
+        }
+
+        if (!string.IsNullOrEmpty(label))
+        {
+            labelText = label;
+            this.label.text = labelText;
+        }
+
+        UpdateSliderValue(value.ToString());
+        UpdateInputFieldValue(value);
     }
 
 

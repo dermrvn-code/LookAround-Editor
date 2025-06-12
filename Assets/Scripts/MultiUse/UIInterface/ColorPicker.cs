@@ -14,10 +14,20 @@ public class ColorPicker : MonoBehaviour
 
     public UnityEvent<Color> OnColorChange = new UnityEvent<Color>();
 
-    void Start()
+    void Awake()
     {
         label.text = labelText;
         colorPicker.SetColor(defaultColor);
         colorPicker.onColorChange.AddListener((color) => OnColorChange?.Invoke(color));
+    }
+
+    public void Initialize(Color color, string label = "")
+    {
+        if (label != "")
+        {
+            labelText = label;
+            this.label.text = label;
+        }
+        colorPicker.SetColor(color);
     }
 }

@@ -25,15 +25,17 @@ public class SceneChanger : MonoBehaviour
     public VideoPlayer vp;
     SceneManager sm;
     InteractionHandler ih;
+    PanelManager panelManager;
     TextureManager textureManager;
 
-    Scene currentScene;
+    public Scene currentScene;
 
     void Start()
     {
         sm = FindObjectOfType<SceneManager>();
         ih = FindObjectOfType<InteractionHandler>();
         textureManager = FindObjectOfType<TextureManager>();
+        panelManager = FindObjectOfType<PanelManager>();
 
         // To prevent particles in the editor window
         particlesGameobject.SetActive(true);
@@ -138,9 +140,12 @@ public class SceneChanger : MonoBehaviour
                 else
                 {
                     Debug.LogWarning("Scene type not supported");
+                    return;
                 }
+
+                panelManager.CloseSidebar();
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Debug.LogError("Error while switching to scene " + scene.Name);
                 Debug.LogError(e.Message);
@@ -150,8 +155,10 @@ public class SceneChanger : MonoBehaviour
 
 
 
-    public void LoadSceneElements(List<SceneElement> sceneElements)
+    public void LoadSceneElements(Dictionary<int, SceneElement> sceneElementsDict)
     {
+        List<SceneElement> sceneElements = new List<SceneElement>(sceneElementsDict.Values);
+
         var children = new List<GameObject>();
         foreach (Transform child in sceneElementsContainer.transform) children.Add(child.gameObject);
         if (Application.isPlaying)
@@ -197,6 +204,7 @@ public class SceneChanger : MonoBehaviour
         {
             ActionParser(sceneElement.action);
         });
+        text.gameObject.AddComponent<SceneElementHolder>().sceneElement = sceneElement;
     }
 
     [SerializeField]
@@ -206,9 +214,9 @@ public class SceneChanger : MonoBehaviour
     public void LoadTextboxElement(SceneElement sceneElement)
     {
         var text = Instantiate(textboxPrefab, sceneElementsContainer.transform);
-        var tmptext = text.GetComponentInChildren<TMP_Text>();
-        var spriteRenderer = text.GetComponentInChildren<SpriteRenderer>();
-        tmptext.text = sceneElement.text;
+        var textbox = text.GetComponentInChildren<TextBox>();
+        textbox.SetText(sceneElement.text);
+        textbox.SetColor(ColorUtility.TryParseHtmlString(sceneElement.color, out Color unityColor) ? unityColor : Color.white); textbox.iconName = sceneElement.icon;
         DomePosition dp = text.GetComponent<DomePosition>();
         dp.position.x = sceneElement.x;
         dp.position.y = sceneElement.y;
@@ -239,8 +247,9 @@ public class SceneChanger : MonoBehaviour
         }
         if (sprite != null)
         {
-            spriteRenderer.sprite = sprite;
+            textbox.SetIcon(sprite, sceneElement.icon);
         }
+        text.AddComponent<SceneElementHolder>().sceneElement = sceneElement;
     }
 
 
@@ -266,6 +275,7 @@ public class SceneChanger : MonoBehaviour
         Color color = ColorUtility.TryParseHtmlString(sceneElement.color, out Color unityColor) ? unityColor : Color.white;
         interactableArrow.color = color;
 
+        arrow.AddComponent<SceneElementHolder>().sceneElement = sceneElement;
 
     }
 

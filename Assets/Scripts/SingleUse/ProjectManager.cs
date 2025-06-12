@@ -75,7 +75,6 @@ public class ProjectManager : MonoBehaviour
                 sceneTile.Setup(scene);
             }
             sceneChanger.ToStartScene();
-            graphManager.LoadGraph();
             panelManager.SwitchToScene();
         });
     }

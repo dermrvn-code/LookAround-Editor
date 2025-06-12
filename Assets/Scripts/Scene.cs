@@ -15,7 +15,7 @@ public class Scene
     {
         get => _source;
     }
-    public List<SceneElement> SceneElements
+    public Dictionary<int, SceneElement> SceneElements
     {
         get => _sceneElements;
     }
@@ -36,12 +36,12 @@ public class Scene
     MediaType _type;
     string _name;
     string _source;
-    List<SceneElement> _sceneElements;
+    Dictionary<int, SceneElement> _sceneElements;
     bool _isStartScene;
     float _xOffset;
     float _yOffset;
 
-    public Scene(MediaType type, string name, string source, List<SceneElement> sceneElements, bool isStartScene, float xOffset = 0, float yOffset = 0)
+    public Scene(MediaType type, string name, string source, Dictionary<int, SceneElement> sceneElements, bool isStartScene, float xOffset = 0, float yOffset = 0)
     {
         _type = type;
         _name = name;

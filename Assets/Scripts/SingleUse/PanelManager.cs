@@ -16,6 +16,8 @@ public class PanelManager : MonoBehaviour
 
     public ElementsSettingManager esm;
 
+    GraphManager graphManager;
+
     void Start()
     {
         esm = GetComponent<ElementsSettingManager>();
@@ -25,6 +27,7 @@ public class PanelManager : MonoBehaviour
         BottomBarSetActive(true);
         GraphSetActive(false);
         SidebarSetActive(false);
+        graphManager = graphPanel.GetComponent<GraphManager>();
     }
 
     public void TopBarSetActive(bool isActive)
@@ -53,7 +56,10 @@ public class PanelManager : MonoBehaviour
     {
         if (graphPanel != null)
         {
-            Debug.Log("Setting graph panel active: " + isActive);
+            if (isActive)
+            {
+                graphManager.LoadGraph();
+            }
             foreach (Transform child in graphPanel.transform)
             {
                 child.gameObject.SetActive(isActive);
@@ -70,7 +76,6 @@ public class PanelManager : MonoBehaviour
     {
         if (sideBar != null)
         {
-            Debug.Log("visible: " + isActive);
             sideBar.GetComponent<Animator>().SetBool("visible", isActive);
             if (!sideBar.activeSelf)
             {

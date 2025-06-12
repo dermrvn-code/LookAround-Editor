@@ -433,8 +433,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59c3cf74680123e46b4122f3e0a64626, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropdown: {fileID: 0}
-  label: {fileID: 0}
+  dropdown: {fileID: 1736867057509401712}
+  label: {fileID: 2899847152698351524}
   options: []
   labelText: 
   OnValueChanged:
