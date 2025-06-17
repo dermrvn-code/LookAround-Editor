@@ -12,9 +12,12 @@ public class TextInput : MonoBehaviour
     public string labelText;
     public UnityEvent<string> OnValueChanged = new UnityEvent<string>();
 
+    public string value;
+
     void Start()
     {
         label.text = labelText;
+        inputField.onValueChanged.AddListener((value) => this.value = value);
         inputField.onValueChanged.AddListener((value) => OnValueChanged?.Invoke(value));
     }
 
@@ -28,6 +31,7 @@ public class TextInput : MonoBehaviour
         }
 
         inputField.text = initialValue;
+        value = initialValue;
     }
 
 

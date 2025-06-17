@@ -86,23 +86,23 @@ public class SceneChanger : MonoBehaviour
         domeRenderer.material = photoMaterial;
     }
 
-    public void SwitchSceneAnimation(Scene scene)
+    public void SwitchSceneAnimation(Scene scene, bool closeSidebar = true, bool forceReload = false)
     {
-        if (scene == null || scene != currentScene)
+        if (scene == null || scene != currentScene || forceReload)
         {
             TransitionParticles((sceneLoaded) =>
             {
                 SwitchScene(scene, () =>
                 {
                     sceneLoaded?.Invoke();
-                });
+                }, closeSidebar, forceReload);
             });
         }
     }
 
-    public void SwitchScene(Scene scene, Action onLoaded = null)
+    public void SwitchScene(Scene scene, Action onLoaded = null, bool closeSidebar = true, bool forceReload = false)
     {
-        if (scene == null || scene != currentScene)
+        if (scene == null || scene != currentScene || forceReload)
         {
             currentScene = scene;
             LoadSceneElements(scene.SceneElements);
@@ -143,7 +143,10 @@ public class SceneChanger : MonoBehaviour
                     return;
                 }
 
-                panelManager.CloseSidebar();
+                if (closeSidebar)
+                {
+                    panelManager.CloseSidebar();
+                }
             }
             catch (Exception e)
             {
@@ -153,7 +156,48 @@ public class SceneChanger : MonoBehaviour
         }
     }
 
+    public void UpdateOffset(float? xOffset = null, float? yOffset = null)
+    {
+        if (currentScene == null) return;
 
+        Vector2 newOffset;
+        if (currentScene.Type == Scene.MediaType.Video)
+        {
+            newOffset = videoMaterial.mainTextureOffset;
+            if (xOffset != null) newOffset.x = xOffset.Value;
+            if (yOffset != null) newOffset.y = yOffset.Value;
+            videoMaterial.mainTextureOffset = newOffset;
+        }
+        else if (currentScene.Type == Scene.MediaType.Photo)
+        {
+
+            newOffset = photoMaterial.mainTextureOffset;
+            if (xOffset != null) newOffset.x = xOffset.Value;
+            if (yOffset != null) newOffset.y = yOffset.Value;
+            Debug.Log(newOffset);
+            photoMaterial.mainTextureOffset = newOffset;
+        }
+    }
+
+    public void UpateMedium(string path)
+    {
+        if (currentScene == null) return;
+
+        if (currentScene.Type == Scene.MediaType.Video)
+        {
+            SwitchToVideo();
+            vp.url = path;
+        }
+        else if (currentScene.Type == Scene.MediaType.Photo)
+        {
+            StartCoroutine(textureManager.GetTexture(path, texture =>
+                    {
+                        Debug.Log("Updating photo texture to: " + path);
+                        photoMaterial.mainTexture = texture;
+                        SwitchToFoto(); ;
+                    }));
+        }
+    }
 
     public void LoadSceneElements(Dictionary<int, SceneElement> sceneElementsDict)
     {

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class ProcessIndicator : MonoBehaviour
 {
     public Image background;
-    public Image loader;
+    public GameObject loader;
 
     static ProcessIndicator instance;
     void Awake()
@@ -18,14 +18,14 @@ public class ProcessIndicator : MonoBehaviour
     {
         if (instance == null) return;
         instance.background.enabled = true;
-        instance.loader.enabled = true;
+        instance.loader.SetActive(true);
     }
 
     public static void Hide()
     {
         if (instance == null) return;
         instance.background.enabled = false;
-        instance.loader.enabled = false;
+        instance.loader.SetActive(false);
     }
 
 }

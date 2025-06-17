@@ -1,50 +1,188 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class SceneSettings : MonoBehaviour
 {
+    string initialName;
+    bool initialIsStartScene;
+    string initialFilePath;
+    Vector2 initialOffset;
 
-    string sceneName;
-    bool isStartScene = false;
-    string filePath;
 
     public TextInput sceneNameInput;
     public ToggleInput startSceneToggle;
     public ImageUploader imageUploader;
+    public SliderAndInput xOffsetInput;
+    public SliderAndInput yOffsetInput;
+
+    SceneManager sceneManager;
+    SceneChanger sceneChanger;
+    PanelManager panelManager;
 
     void Start()
     {
-        sceneNameInput.OnValueChanged.AddListener((value) =>
+        sceneManager = FindObjectOfType<SceneManager>();
+        sceneChanger = FindObjectOfType<SceneChanger>();
+        panelManager = FindObjectOfType<PanelManager>();
+
+        xOffsetInput.OnValueChanged.AddListener((value) =>
         {
-            sceneName = value;
+            if (CheckIfLiveUpdatable()) sceneChanger.UpdateOffset(xOffset: MapOffsetToDotted(value, 0).x);
         });
-        startSceneToggle.OnValueChanged.AddListener((value) =>
+
+        yOffsetInput.OnValueChanged.AddListener((value) =>
         {
-            isStartScene = value;
+            if (CheckIfLiveUpdatable()) sceneChanger.UpdateOffset(yOffset: MapOffsetToDotted(0, value).y);
         });
-        imageUploader.OnValueChanged.AddListener((path) =>
+
+        imageUploader.OnValueChanged.AddListener((value) =>
         {
-            filePath = path;
+            if (!string.IsNullOrEmpty(value))
+            {
+                Debug.Log("Image path changed to: " + value);
+                if (CheckIfLiveUpdatable()) sceneChanger.UpateMedium(value);
+            }
         });
     }
 
-    // Update is called once per frame
-    void Save()
+    bool CheckIfLiveUpdatable()
     {
-        // Hier können Sie den Code zum Speichern der Szeneinstellungen hinzufügen
-        // Zum Beispiel in einer Datei oder in einem Datenbankeintrag
-        Debug.Log($"Scene Name: {sceneName}, Is Start Scene: {isStartScene}, File Path: {filePath}");
+        return sceneChanger.currentScene.Name == initialName;
     }
 
-    public void Initialize(string sceneName, bool isStartScene, string filePath)
+    public void Save()
     {
-        this.sceneName = sceneName;
-        this.isStartScene = isStartScene;
-        this.filePath = filePath;
+        Scene scene = _Save();
+        if (scene != null)
+        {
+            InfoText.ShowInfo("Szeneneinstellungen gespeichert.");
+        }
+    }
+
+    public static Vector2 MapOffsetToDotted(float x, float y)
+    {
+        return new Vector2(
+            x / 360,
+            (y / 360) - 0.5f
+        );
+    }
+
+    public static Vector2 MapOffsetToDegree(float x, float y)
+    {
+        return new Vector2(
+            x * 360,
+            (y + 0.5f) * 360
+        );
+    }
+
+    Scene _Save()
+    {
+        string sceneName = sceneNameInput.value;
+        bool isStartScene = startSceneToggle.value;
+        string filePath = imageUploader.value;
+        Vector2 offset = new Vector2(
+            xOffsetInput.value,
+            yOffsetInput.value
+        );
+
+
+        if (sceneName == initialName && isStartScene == initialIsStartScene &&
+            filePath == initialFilePath && offset == initialOffset)
+        {
+            InfoText.ShowInfo("Es wurden keine Änderungen vorgenommen.");
+            return null;
+        }
+
+        ProcessIndicator.Show();
+        Vector2 offsetMapped = MapOffsetToDotted(
+            offset.x,
+            offset.y
+        );
+
+        if (isStartScene != initialIsStartScene)
+        {
+            if (isStartScene)
+            {
+                sceneManager.SetStartScene(sceneName: sceneName);
+            }
+            else
+            {
+                sceneManager.SetStartScene(sceneNameAvoid: sceneName);
+            }
+        }
+
+
+        sceneManager.sceneList.TryGetValue(initialName, out Scene scene);
+
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            InfoText.ShowInfo("Es wurde kein Szenenname angegeben.");
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(filePath))
+        {
+            InfoText.ShowInfo("Es wurde kein Medium ausgewählt.");
+            return null;
+        }
+        if (scene == null || sceneName != initialName)
+        {
+            scene = new Scene(
+                Scene.MediaType.Photo,
+                sceneName,
+                filePath,
+                new Dictionary<int, SceneElement>(),
+                isStartScene,
+                offsetMapped.x,
+                offsetMapped.y
+                );
+            sceneManager.sceneList.Add(sceneName, scene);
+        }
+        else
+        {
+            scene.SetValues(sceneName, filePath, isStartScene, offsetMapped.x, offsetMapped.y);
+        }
+
+        if (sceneName != initialName)
+        {
+            sceneManager.sceneList.Remove(initialName);
+        }
+        scene.UnsavedChanges = true;
+        panelManager.UpdateSceneList();
+        ProcessIndicator.Hide();
+        SetInitials(sceneName, isStartScene, filePath, (int)offset.x, (int)offset.y);
+        return scene;
+    }
+
+    public void SaveAndLoad()
+    {
+        Scene scene = _Save();
+        if (scene != null)
+        {
+            InfoText.ShowInfo("Szeneneinstellungen gespeichert.");
+            sceneChanger.SwitchSceneAnimation(scene, closeSidebar: false, forceReload: true);
+        }
+    }
+
+    void SetInitials(string sceneName, bool isStartScene, string filePath, int xOffset, int yOffset)
+    {
+
+        initialName = sceneName;
+        initialIsStartScene = isStartScene;
+        initialFilePath = filePath;
+        initialOffset = new Vector2(xOffset, yOffset);
+    }
+
+    public void Initialize(string sceneName, bool isStartScene, string filePath, int xOffset = 0, int yOffset = 250)
+    {
+        SetInitials(sceneName, isStartScene, filePath, xOffset, yOffset);
 
         sceneNameInput.Initialize(sceneName);
         startSceneToggle.Initialize(isStartScene);
         imageUploader.Initialize(filePath);
+        xOffsetInput.Initialize(xOffset);
+        yOffsetInput.Initialize(yOffset);
     }
 }

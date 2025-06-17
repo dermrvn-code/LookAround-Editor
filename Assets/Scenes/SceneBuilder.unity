@@ -1964,7 +1964,8 @@ MonoBehaviour:
   sideBar: {fileID: 106011877}
   graphPanel: {fileID: 925317617}
   dome: {fileID: 1496091152}
-  esm: {fileID: 0}
+  sceneTilePrefab: {fileID: 0}
+  SceneOverviewList: {fileID: 0}
 --- !u!1 &469246001
 GameObject:
   m_ObjectHideFlags: 0
@@ -2497,6 +2498,7 @@ GameObject:
   - component: {fileID: 563261381}
   - component: {fileID: 563261382}
   - component: {fileID: 563261383}
+  - component: {fileID: 563261384}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -2587,8 +2589,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentSceneOverview: 
   currentProjectName: 
-  sceneTilePrefab: {fileID: 1423871167993605290, guid: c651775bb066218408cdbe59ba8e36a8, type: 3}
-  SceneOverviewList: {fileID: 733518223}
   loader: {fileID: 1014032690}
   projectNameText: {fileID: 1731455058}
 --- !u!114 &563261380
@@ -2620,7 +2620,8 @@ MonoBehaviour:
   sideBar: {fileID: 106011877}
   graphPanel: {fileID: 925317617}
   dome: {fileID: 1496091152}
-  esm: {fileID: 0}
+  sceneTilePrefab: {fileID: 1423871167993605290, guid: c651775bb066218408cdbe59ba8e36a8, type: 3}
+  SceneOverviewList: {fileID: 733518223}
 --- !u!114 &563261382
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2695,6 +2696,18 @@ MonoBehaviour:
     prefab: {fileID: 5989287706789979100, guid: 004e38a9b71bb0c40aa336e9f0e07259, type: 3}
   - value: Textbox
     prefab: {fileID: 7724541756597076768, guid: 38e330525c0b1674d93630885b7d7696, type: 3}
+--- !u!114 &563261384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563261369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e21102aae7379d944839437b7897ae84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &580295482
 GameObject:
   m_ObjectHideFlags: 0
@@ -2867,7 +2880,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 637487837}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 563261384}
+        m_TargetAssemblyTypeName: SceneParser, Assembly-CSharp
+        m_MethodName: Parse
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &637487837
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3940,7 +3965,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   background: {fileID: 958770977}
-  loader: {fileID: 2107959847}
+  loader: {fileID: 2107959845}
 --- !u!1 &1014032686
 GameObject:
   m_ObjectHideFlags: 0
@@ -11927,7 +11952,7 @@ GameObject:
   - component: {fileID: 2107959850}
   - component: {fileID: 2107959849}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Loader
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11999,7 +12024,7 @@ Animation:
   m_GameObject: {fileID: 2107959845}
   m_Enabled: 1
   serializedVersion: 3
-  m_Animation: {fileID: 0}
+  m_Animation: {fileID: 7400000, guid: 85b50670d43b97944a0a4794996cf8e0, type: 2}
   m_Animations:
   - {fileID: 7400000, guid: 85b50670d43b97944a0a4794996cf8e0, type: 2}
   m_WrapMode: 0
@@ -12190,7 +12215,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7807952307845817808}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 563261382}
+        m_TargetAssemblyTypeName: SidebarSettingsManager, Assembly-CSharp
+        m_MethodName: OpenCreateScene
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!224 &6062126587137423497
 RectTransform:
   m_ObjectHideFlags: 0

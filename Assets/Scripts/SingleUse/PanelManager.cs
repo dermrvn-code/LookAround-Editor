@@ -14,20 +14,27 @@ public class PanelManager : MonoBehaviour
 
     public GameObject dome;
 
-    public ElementsSettingManager esm;
+    public GameObject sceneTilePrefab;
+    public Transform SceneOverviewList;
 
     GraphManager graphManager;
+    SceneManager sceneManager;
+
+    SidebarSettingsManager sidebarSettingsManager;
 
     void Start()
     {
-        esm = GetComponent<ElementsSettingManager>();
+        graphManager = graphPanel.GetComponent<GraphManager>();
+        sidebarSettingsManager = FindObjectOfType<SidebarSettingsManager>();
+        sceneManager = FindObjectOfType<SceneManager>();
+
         sideBar.SetActive(false);
         DomeSetActive(true);
         TopBarSetActive(true);
         BottomBarSetActive(true);
         GraphSetActive(false);
         SidebarSetActive(false);
-        graphManager = graphPanel.GetComponent<GraphManager>();
+
     }
 
     public void TopBarSetActive(bool isActive)
@@ -72,6 +79,23 @@ public class PanelManager : MonoBehaviour
         }
     }
 
+    public void UpdateSceneList()
+    {
+        for (int i = SceneOverviewList.childCount - 1; i > 0; i--)
+        {
+            Destroy(SceneOverviewList.GetChild(i).gameObject);
+        }
+        foreach (var scene in sceneManager.sceneList.Values)
+        {
+            SceneTile sceneTile = Instantiate(sceneTilePrefab, SceneOverviewList).GetComponent<SceneTile>();
+            sceneTile.Setup(scene, scene.IsStartScene);
+            sceneTile.editButton.onClick.AddListener(() =>
+            {
+                sidebarSettingsManager.OpenSceneSettings(scene.Name);
+            });
+        }
+    }
+
     public void SidebarSetActive(bool isActive)
     {
         if (sideBar != null)
@@ -84,9 +108,9 @@ public class PanelManager : MonoBehaviour
         }
         if (!isActive)
         {
-            if (esm != null)
+            if (sidebarSettingsManager != null)
             {
-                esm.Deselect();
+                sidebarSettingsManager.Deselect();
             }
         }
     }

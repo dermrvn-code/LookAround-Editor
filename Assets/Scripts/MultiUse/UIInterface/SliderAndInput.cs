@@ -79,6 +79,8 @@ public class SliderAndInput : MonoBehaviour
 
         UpdateSliderValue(value.ToString());
         UpdateInputFieldValue(value);
+        OnValueChanged?.Invoke(value);
+        this.value = value;
     }
 
 

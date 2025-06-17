@@ -23,6 +23,8 @@ public class ImageUploader : MonoBehaviour
 
     public UnityEvent<string> OnValueChanged = new UnityEvent<string>();
 
+    public string value;
+
     void Awake()
     {
         animator.SetBool("Open", false);
@@ -41,6 +43,7 @@ public class ImageUploader : MonoBehaviour
             if (paths.Length == 1)
             {
                 string path = paths[0];
+                value = path;
                 DisplayImage(path);
             }
             else
@@ -64,11 +67,14 @@ public class ImageUploader : MonoBehaviour
             return;
         }
         imagePath.text = Path.GetFileName(path);
-        displayImage.sprite = LoadSpriteFromFile(path);
+        Sprite sprite = LoadSpriteFromFile(path);
 
-        animator.SetBool("Open", true);
-
-        OnValueChanged?.Invoke(path);
+        if (sprite != null)
+        {
+            displayImage.sprite = sprite;
+            animator.SetBool("Open", true);
+            OnValueChanged?.Invoke(path);
+        }
     }
 
     void Clear()
@@ -109,6 +115,7 @@ public class ImageUploader : MonoBehaviour
             this.label.text = label;
         }
 
+        value = path;
         StartCoroutine(_DisplayImage(path));
     }
 

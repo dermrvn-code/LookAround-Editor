@@ -9,8 +9,7 @@ public class ProjectManager : MonoBehaviour
     public string currentSceneOverview = "";
     public string currentProjectName = "";
 
-    public GameObject sceneTilePrefab;
-    public Transform SceneOverviewList;
+    private bool isInProject = false;
 
     public Loader loader;
 
@@ -18,9 +17,7 @@ public class ProjectManager : MonoBehaviour
 
     private SceneManager sceneManager;
     private SceneChanger sceneChanger;
-    private GraphManager graphManager;
     private PanelManager panelManager;
-    private ElementsSettingManager elementsSettingManager;
 
     void Start()
     {
@@ -37,16 +34,12 @@ public class ProjectManager : MonoBehaviour
             Debug.LogError("SceneChanger not found in the scene.");
             return;
         }
-
-        graphManager = FindObjectOfType<GraphManager>();
         panelManager = FindObjectOfType<PanelManager>();
-        elementsSettingManager = FindObjectOfType<ElementsSettingManager>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public bool IsInProject()
     {
-
+        return isInProject;
     }
 
     string CaseToSpace(string str)
@@ -69,20 +62,13 @@ public class ProjectManager : MonoBehaviour
         sceneManager.LoadSceneOverview(path, loader, () =>
         {
             projectNameText.text = currentProjectName;
+            panelManager.UpdateSceneList();
             loader.gameObject.SetActive(false);
-
-            foreach (var scene in sceneManager.sceneList.Values)
-            {
-                SceneTile sceneTile = Instantiate(sceneTilePrefab, SceneOverviewList).GetComponent<SceneTile>();
-                sceneTile.Setup(scene, scene.IsStartScene);
-                sceneTile.editButton.onClick.AddListener(() =>
-                {
-                    elementsSettingManager.OpenSceneSettings(scene.Name);
-                });
-            }
             sceneChanger.ToStartScene();
             panelManager.SwitchToScene();
+            isInProject = true;
         });
+
     }
 
     public void OpenProjectFolderBrowser()

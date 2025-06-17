@@ -20,6 +20,7 @@ public class SpriteSelector : MonoBehaviour
     private GameObject currentCheck;
 
     public UnityEvent<string> OnElementSelected = new UnityEvent<string>();
+    public string value;
 
 
     public void Initialize(Pairs.SpritePair[] _elementsList, string selectedValue, string label = "")
@@ -47,6 +48,11 @@ public class SpriteSelector : MonoBehaviour
                 SelectElement(value, newItem);
             }
         }
+        OnElementSelected?.AddListener((value) =>
+        {
+            this.value = value;
+        });
+        value = selectedValue;
     }
 
     void SelectElement(string value, GameObject selectedItem)

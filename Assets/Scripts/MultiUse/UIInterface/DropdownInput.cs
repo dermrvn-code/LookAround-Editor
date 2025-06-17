@@ -14,15 +14,20 @@ public class DropdownInput : MonoBehaviour
     public string labelText;
     public UnityEvent<string> OnValueChanged = new UnityEvent<string>();
 
+    public string value;
+
     void Start()
     {
         if (labelText != "")
         {
             label.text = labelText;
         }
+
+        dropdown.onValueChanged.AddListener((value) => this.value = dropdown.options[value].text);
         dropdown.onValueChanged.AddListener((value) => OnValueChanged?.Invoke(dropdown.options[value].text));
         dropdown.options.Clear();
         dropdown.AddOptions(options);
+
     }
 
     public void Initialize(List<string> optionTexts, string selectedValue, string label = "")
@@ -48,6 +53,8 @@ public class DropdownInput : MonoBehaviour
         {
             dropdown.value = index;
         }
+
+        value = selectedValue;
     }
 
 

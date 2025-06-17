@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ElementsSettingManager : MonoBehaviour
+public class SidebarSettingsManager : MonoBehaviour
 {
     public Camera cam;
     public Selector selector;
@@ -20,12 +20,14 @@ public class ElementsSettingManager : MonoBehaviour
     PanelManager panelManager;
     SceneChanger sceneChanger;
     SceneManager sceneManager;
+    ProjectManager projectManager;
 
     void Start()
     {
         panelManager = FindObjectOfType<PanelManager>();
         sceneChanger = FindObjectOfType<SceneChanger>();
         sceneManager = FindObjectOfType<SceneManager>();
+        projectManager = FindObjectOfType<ProjectManager>();
 
         prefabDictionary = new Dictionary<string, GameObject>();
         foreach (var pair in prefabs)
@@ -260,7 +262,12 @@ public class ElementsSettingManager : MonoBehaviour
             var dropdown = Instantiate(prefabDictionary["Dropdown"], elementsContainer).GetComponent<DropdownInput>();
             var actionOptions = new List<string> { "Keine" };
             foreach (var scene in sceneManager.sceneList.Values)
-                actionOptions.Add(scene.Name);
+            {
+                if (scene.Name != sceneChanger.currentScene.Name)
+                {
+                    actionOptions.Add(scene.Name);
+                }
+            }
             dropdown.Initialize(actionOptions, sceneName, "Gehe zu");
 
             var button = Instantiate(prefabDictionary["Button"], elementsContainer).GetComponent<Button>();
@@ -305,6 +312,7 @@ public class ElementsSettingManager : MonoBehaviour
     public void OpenSceneSettings(string sceneName)
     {
         ProcessIndicator.Show();
+        panelManager.SwitchToScene();
         panelManager.SidebarSetActive(false);
         ClearSidebar();
         panelManager.SidebarSetActive(true);
@@ -314,8 +322,48 @@ public class ElementsSettingManager : MonoBehaviour
         if (sceneManager.sceneList.ContainsKey(sceneName))
         {
             var scene = sceneManager.sceneList[sceneName];
-            sceneSettings.Initialize(sceneName, scene.IsStartScene, scene.Source);
+            Vector2 offset = SceneSettings.MapOffsetToDegree(scene.XOffset, scene.YOffset);
+
+            sceneSettings.Initialize(sceneName, scene.IsStartScene, scene.Source, (int)offset.x, (int)offset.y);
         }
+        ProcessIndicator.Hide();
+    }
+    string[] funnySceneNames = new string[]
+    {
+        "TatooineSundown",
+        "DeathStarLounge",
+        "JediCouncil",
+        "EwokVillage",
+        "DagobahSwamp",
+        "HothHangar",
+        "WookieeWorkshop",
+        "SithTemple",
+        "CantinaBreak",
+        "MillenniumFalcon",
+        "PodracerPit",
+        "DroidDepot",
+        "CloudCityView",
+        "KesselRun",
+        "YodaHut"
+    };
+
+    public void OpenCreateScene()
+    {
+        if (!projectManager.IsInProject())
+        {
+            InfoText.ShowInfo("Bitte erstelle oder lade ein Projekt, um Szenen zu erstellen.");
+            return;
+        }
+
+        ProcessIndicator.Show();
+        panelManager.SwitchToScene();
+        panelManager.SidebarSetActive(false);
+        ClearSidebar();
+        panelManager.SidebarSetActive(true);
+
+        var sceneSettings = Instantiate(prefabDictionary["SceneSettings"], sidebarContainer.transform).GetComponent<SceneSettings>();
+        string sceneName = funnySceneNames[Random.Range(0, funnySceneNames.Length)];
+        sceneSettings.Initialize(sceneName, sceneManager.sceneList.Count == 0, "");
         ProcessIndicator.Hide();
     }
 

@@ -184,6 +184,36 @@ public class SceneManager : MonoBehaviour
         return sceneObj;
     }
 
+    public void SetStartScene(string sceneName = "", string sceneNameAvoid = "")
+    {
+        if (!string.IsNullOrEmpty(sceneName))
+        {
+            if (sceneList.ContainsKey(sceneName))
+            {
+                foreach (var scene in sceneList.Values)
+                {
+                    scene.SetStartScene(false); // Reset all scenes
+                }
+                sceneList[sceneName].SetStartScene(true); // Set the specified scene as start scene
+            }
+            else
+            {
+                Debug.LogWarning("Scene not found: " + sceneName);
+            }
+        }
+        else
+        {
+            foreach (var scene in sceneList.Values)
+            {
+                scene.SetStartScene(false); // Reset all scenes
+            }
+
+            sceneList.FirstOrDefault(x => x.Key != sceneNameAvoid).Value?.SetStartScene(true);
+        }
+
+
+    }
+
 
     void OnDestroy()
     {

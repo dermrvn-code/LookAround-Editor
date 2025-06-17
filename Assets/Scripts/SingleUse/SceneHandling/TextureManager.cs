@@ -99,7 +99,7 @@ public class TextureManager : MonoBehaviour
 
     private IEnumerator LoadTextureAsync(string filePath, Action<Texture2D> onLoaded)
     {
-        if (System.IO.File.Exists(filePath))
+        if (File.Exists(filePath))
         {
             using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture("file://" + filePath))
             {

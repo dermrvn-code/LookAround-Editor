@@ -12,10 +12,12 @@ public class ToggleInput : MonoBehaviour
 
     public string labelText;
     public UnityEvent<bool> OnValueChanged = new UnityEvent<bool>();
+    public bool value;
 
     void Start()
     {
         label.text = labelText;
+        toggle.onValueChanged.AddListener((value) => this.value = value);
         toggle.onValueChanged.AddListener((value) => OnValueChanged?.Invoke(value));
     }
 
@@ -29,6 +31,7 @@ public class ToggleInput : MonoBehaviour
         }
 
         toggle.isOn = initialValue;
+        value = initialValue;
     }
 
 

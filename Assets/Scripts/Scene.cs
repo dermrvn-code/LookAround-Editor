@@ -56,6 +56,20 @@ public class Scene
 
     public override string ToString()
     {
-        return "Scene '" + Name + "' of type '" + Type.ToString() + "' and source '" + Source + "'";
+        return "Scene '" + Name + "' of type '" + Type.ToString() + "' and source '" + Source + "', Offset(" + XOffset + ", " + YOffset + ")";
+    }
+
+    public void SetValues(string name, string source, bool isStartScene, float xOffset = 0, float yOffset = 0)
+    {
+        _name = name;
+        _source = source;
+        _isStartScene = isStartScene;
+        _xOffset = xOffset;
+        _yOffset = yOffset;
+    }
+
+    public void SetStartScene(bool isStartScene)
+    {
+        _isStartScene = isStartScene;
     }
 }

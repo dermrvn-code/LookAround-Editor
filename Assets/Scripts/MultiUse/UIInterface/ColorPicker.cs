@@ -13,6 +13,7 @@ public class ColorPicker : MonoBehaviour
     public Color defaultColor = Color.green;
 
     public UnityEvent<Color> OnColorChange = new UnityEvent<Color>();
+    public Color value;
 
     void Awake()
     {
@@ -29,5 +30,6 @@ public class ColorPicker : MonoBehaviour
             this.label.text = label;
         }
         colorPicker.SetColor(color);
+        value = color;
     }
 }
