@@ -8,25 +8,32 @@ public class SceneTile : MonoBehaviour
 
     public TMP_Text sceneNameText;
     public Image image;
+    public bool startScene = false;
+    public GameObject icon;
+    public Button mainButton;
+    public Button editButton;
 
     SceneChanger sceneChanger;
     TextureManager textureManager;
+    Animator animator;
 
     void Awake()
     {
         sceneChanger = FindObjectOfType<SceneChanger>();
         textureManager = FindObjectOfType<TextureManager>();
+        animator = GetComponent<Animator>();
 
-        Button button = GetComponent<Button>();
-        if (button != null)
+        icon.SetActive(startScene);
+        if (mainButton != null)
         {
-            button.onClick.AddListener(OnClick);
+            mainButton.onClick.AddListener(OnClick);
         }
     }
 
-    public void Setup(Scene scene)
+    public void Setup(Scene scene, bool startScene = false)
     {
         this.scene = scene;
+        SetStartScene(startScene);
 
         if (sceneNameText != null)
         {
@@ -49,5 +56,24 @@ public class SceneTile : MonoBehaviour
     void OnClick()
     {
         sceneChanger.SwitchSceneAnimation(scene);
+    }
+
+
+    public void Open()
+    {
+        animator.SetBool("Open", true);
+    }
+
+    public void Close()
+    {
+        animator.SetBool("Open", false);
+    }
+
+
+    public void SetStartScene(bool isStart)
+    {
+        startScene = isStart;
+        icon.SetActive(isStart);
+        sceneNameText.fontStyle = isStart ? (FontStyles.Underline | FontStyles.Bold) : FontStyles.Bold;
     }
 }

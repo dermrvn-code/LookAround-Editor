@@ -8,7 +8,7 @@ public class DomePositionInput : MonoBehaviour
     public SliderAndInput tilt;
     public SliderAndInput distance;
 
-    public UnityEvent<float, float, float, float> OnInputChanged = new UnityEvent<float, float, float, float>();
+    public UnityEvent<int, int, int, int> OnInputChanged = new UnityEvent<int, int, int, int>();
 
 
     void SetupListener()
@@ -53,7 +53,7 @@ public class DomePositionInput : MonoBehaviour
         });
     }
 
-    public void Initialize(float x, float y, float dist, float tiltVal)
+    public void Initialize(int x, int y, int dist, int tiltVal)
     {
         xPos.Initialize(x);
         yPos.Initialize(y);

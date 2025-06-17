@@ -19,14 +19,13 @@ public class ImageUploader : MonoBehaviour
     public string labelText = "";
 
     string emptyImagePath;
-    Animator animator;
+    public Animator animator;
 
     public UnityEvent<string> OnValueChanged = new UnityEvent<string>();
 
-    void Start()
+    void Awake()
     {
-        animator = GetComponent<Animator>();
-        animator.enabled = false;
+        animator.SetBool("Open", false);
         label.text = labelText;
 
         uploadButton.onClick.AddListener(UploadImage);
@@ -42,25 +41,34 @@ public class ImageUploader : MonoBehaviour
             if (paths.Length == 1)
             {
                 string path = paths[0];
-                if (string.IsNullOrEmpty(path))
-                {
-                    Clear();
-                    return;
-                }
-
-                imagePath.text = Path.GetFileName(path);
-                displayImage.sprite = LoadSpriteFromFile(path);
-
-                OnValueChanged?.Invoke(path);
-
-                animator.enabled = true;
-                animator.SetBool("Open", true);
+                DisplayImage(path);
             }
             else
             {
                 Clear();
             }
         });
+    }
+
+    void DisplayImage(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            Clear();
+            return;
+        }
+
+        if (!File.Exists(path))
+        {
+            Clear();
+            return;
+        }
+        imagePath.text = Path.GetFileName(path);
+        displayImage.sprite = LoadSpriteFromFile(path);
+
+        animator.SetBool("Open", true);
+
+        OnValueChanged?.Invoke(path);
     }
 
     void Clear()
@@ -91,5 +99,22 @@ public class ImageUploader : MonoBehaviour
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
         }
         return null;
+    }
+
+    public void Initialize(string path, string label = "")
+    {
+        if (!string.IsNullOrEmpty(label))
+        {
+            labelText = label;
+            this.label.text = label;
+        }
+
+        StartCoroutine(_DisplayImage(path));
+    }
+
+    IEnumerator _DisplayImage(string path)
+    {
+        yield return new WaitForSeconds(0.1f);
+        DisplayImage(path);
     }
 }

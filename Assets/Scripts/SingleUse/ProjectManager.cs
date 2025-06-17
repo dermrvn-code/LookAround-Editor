@@ -20,6 +20,7 @@ public class ProjectManager : MonoBehaviour
     private SceneChanger sceneChanger;
     private GraphManager graphManager;
     private PanelManager panelManager;
+    private ElementsSettingManager elementsSettingManager;
 
     void Start()
     {
@@ -39,6 +40,7 @@ public class ProjectManager : MonoBehaviour
 
         graphManager = FindObjectOfType<GraphManager>();
         panelManager = FindObjectOfType<PanelManager>();
+        elementsSettingManager = FindObjectOfType<ElementsSettingManager>();
     }
 
     // Update is called once per frame
@@ -72,7 +74,11 @@ public class ProjectManager : MonoBehaviour
             foreach (var scene in sceneManager.sceneList.Values)
             {
                 SceneTile sceneTile = Instantiate(sceneTilePrefab, SceneOverviewList).GetComponent<SceneTile>();
-                sceneTile.Setup(scene);
+                sceneTile.Setup(scene, scene.IsStartScene);
+                sceneTile.editButton.onClick.AddListener(() =>
+                {
+                    elementsSettingManager.OpenSceneSettings(scene.Name);
+                });
             }
             sceneChanger.ToStartScene();
             panelManager.SwitchToScene();

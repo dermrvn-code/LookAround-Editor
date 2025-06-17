@@ -51,7 +51,6 @@ public class Selector : MonoBehaviour
         if (target != null && targetRenderer != null && targetPosition != null)
         {
             meshRenderer.enabled = true;
-            Debug.Log("Selector active for " + target.name);
 
             // Use the mesh's local bounds size and scale it by the target's localScale to match the target's size
             MeshFilter meshFilter = targetRenderer.GetComponent<MeshFilter>();

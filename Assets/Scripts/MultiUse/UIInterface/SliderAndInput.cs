@@ -14,8 +14,8 @@ public class SliderAndInput : MonoBehaviour
     public Slider slider;
     public TMP_Text label;
     public string labelText;
-    public UnityEvent<float> OnValueChanged;
-    public float value;
+    public UnityEvent<int> OnValueChanged;
+    public int value;
 
     void Awake()
     {
@@ -23,15 +23,16 @@ public class SliderAndInput : MonoBehaviour
         slider.minValue = minValue;
         slider.maxValue = maxValue;
         slider.value = defaultValue;
-        UpdateInputFieldValue(slider.value);
-        slider.onValueChanged.AddListener(delegate { UpdateInputFieldValue(slider.value); });
+        UpdateInputFieldValue((int)slider.value);
+        slider.onValueChanged.AddListener(delegate { UpdateInputFieldValue((int)slider.value); });
         inputField.onValueChanged.AddListener(delegate { UpdateSliderValue(inputField.text); });
         inputField.onEndEdit.AddListener(delegate { UpdateInputValueOnEndEdit(); });
     }
 
     void UpdateSliderValue(string value)
     {
-        int parsedValue = int.Parse(value);
+        int parsedValue = 0;
+        int.TryParse(value, out parsedValue);
         if (parsedValue < minValue)
         {
             parsedValue = minValue;
@@ -50,20 +51,22 @@ public class SliderAndInput : MonoBehaviour
         inputField.text = slider.value.ToString();
     }
 
-    void UpdateInputFieldValue(float value)
+    void UpdateInputFieldValue(int value)
     {
         inputField.text = value.ToString();
         OnValueChanged?.Invoke(value);
         this.value = value;
     }
 
-    public void Initialize(float value, string label = "", int minValue = 0, int maxValue = 100)
+    public void Initialize(int value, string label = "", int minValue = 0, int maxValue = 100)
     {
-        if(minValue != 0){
+        if (minValue != 0)
+        {
             this.minValue = minValue;
             slider.minValue = minValue;
         }
-        if(maxValue != 100){        
+        if (maxValue != 100)
+        {
             this.maxValue = maxValue;
             slider.maxValue = maxValue;
         }

@@ -72,7 +72,7 @@ public class PanelManager : MonoBehaviour
         }
     }
 
-    public void SidebarSetActive(bool isActive, GameObject element = null)
+    public void SidebarSetActive(bool isActive)
     {
         if (sideBar != null)
         {

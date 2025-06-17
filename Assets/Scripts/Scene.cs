@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 public class Scene
 {
+    public bool UnsavedChanges { get; set; } = false;
+
     public enum MediaType { Video, Photo };
     public MediaType Type
     {

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TMPro;
@@ -6,12 +7,9 @@ using UnityEngine.UI;
 
 public class ElementsSettingManager : MonoBehaviour
 {
-
-
     public Camera cam;
     public Selector selector;
     public GameObject selectedElement;
-
     public GameObject sidebarContainer;
 
     public List<Pairs.PrefabPair> prefabs;
@@ -22,91 +20,64 @@ public class ElementsSettingManager : MonoBehaviour
     PanelManager panelManager;
     SceneChanger sceneChanger;
     SceneManager sceneManager;
+
     void Start()
     {
         panelManager = FindObjectOfType<PanelManager>();
         sceneChanger = FindObjectOfType<SceneChanger>();
         sceneManager = FindObjectOfType<SceneManager>();
 
-        foreach (Pairs.PrefabPair pair in prefabs)
-        {
-            if (prefabDictionary == null)
-            {
-                prefabDictionary = new Dictionary<string, GameObject>();
-            }
+        prefabDictionary = new Dictionary<string, GameObject>();
+        foreach (var pair in prefabs)
             prefabDictionary[pair.value] = pair.prefab;
-        }
 
-        foreach (Pairs.SpritePair pair in sprites)
-        {
-            if (spriteDictionary == null)
-            {
-                spriteDictionary = new Dictionary<string, Sprite>();
-            }
+        spriteDictionary = new Dictionary<string, Sprite>();
+        foreach (var pair in sprites)
             spriteDictionary[pair.value] = pair.sprite;
-        }
+    }
+
+    void ClearSidebar()
+    {
+        foreach (Transform child in sidebarContainer.transform)
+            Destroy(child.gameObject);
     }
 
     void Select(GameObject target)
     {
         Highlight(target);
-        foreach (Transform child in sidebarContainer.transform)
-        {
-            Destroy(child.gameObject);
-        }
+        ClearSidebar();
+        panelManager.SidebarSetActive(true);
 
-        var domePosition = target.GetComponent<DomePosition>();
-        if (domePosition != null)
-        {
+        if (target.TryGetComponent(out DomePosition domePosition))
             AddDomePosition(domePosition);
-        }
 
-        var interactable = target.GetComponent<Interactable>();
-        if (interactable != null)
-        {
+        if (target.TryGetComponent(out Interactable interactable))
             AddOnAction(interactable);
-        }
 
-        var arrow = target.GetComponent<InteractableArrow>();
-        if (arrow != null)
-        {
+        if (target.TryGetComponent(out InteractableArrow arrow))
             AddArrow(arrow);
-        }
 
-        var textbox = target.GetComponent<TextBox>();
-        if (textbox != null)
-        {
+        if (target.TryGetComponent(out TextBox textbox))
             AddTextbox(textbox);
-        }
 
-        var text = target.GetComponent<TMP_Text>();
-        if (text != null)
-        {
+        if (target.TryGetComponent(out TMP_Text text))
             AddText(text);
-        }
 
-
-        // Force update the sidebar layout
         var contentSizeFitter = sidebarContainer.GetComponent<ContentSizeFitter>();
         var layoutGroup = sidebarContainer.GetComponent<VerticalLayoutGroup>();
 
         if (layoutGroup != null)
-        {
             LayoutRebuilder.ForceRebuildLayoutImmediate(sidebarContainer.GetComponent<RectTransform>());
-        }
         if (contentSizeFitter != null)
         {
-            // Toggle to force update
             contentSizeFitter.enabled = false;
             contentSizeFitter.enabled = true;
         }
-
     }
 
     void Highlight(GameObject target)
     {
         selector.target = target;
-        panelManager.SidebarSetActive(true, target);
     }
 
     public void AddArrow(InteractableArrow arrow)
@@ -116,38 +87,33 @@ public class ElementsSettingManager : MonoBehaviour
         var elementsContainer = group.transform.Find("Elements");
         label.text = "Pfeil Einstellungen";
 
-        var rotationInput = Instantiate(prefabDictionary["Slider"], elementsContainer.transform).GetComponent<SliderAndInput>();
+        var rotationInput = Instantiate(prefabDictionary["Slider"], elementsContainer).GetComponent<SliderAndInput>();
         rotationInput.Initialize(arrow.rotation, "Drehung", 0, 360);
 
-        var colorPicker = Instantiate(prefabDictionary["ColorPicker"], elementsContainer.transform).GetComponent<ColorPicker>();
+        var colorPicker = Instantiate(prefabDictionary["ColorPicker"], elementsContainer).GetComponent<ColorPicker>();
         colorPicker.Initialize(arrow.color, "Hauptfarbe");
 
+        var sceneElement = arrow.GetComponent<SceneElementHolder>()?.sceneElement;
 
-        var sceneElementHolder = arrow.GetComponent<SceneElementHolder>();
-        var sceneElement = sceneElementHolder.sceneElement;
-
-        rotationInput.OnValueChanged.AddListener((value) =>
+        rotationInput.OnValueChanged.AddListener(value =>
         {
             arrow.SetRotation((int)value);
             if (sceneElement != null)
             {
                 sceneElement.rotation = (int)value;
-
                 UpdateSceneElement(sceneElement);
             }
         });
 
-        colorPicker.OnColorChange.AddListener((color) =>
+        colorPicker.OnColorChange.AddListener(color =>
         {
             arrow.SetColor(color);
             if (sceneElement != null)
             {
                 sceneElement.color = $"#{ColorUtility.ToHtmlStringRGB(color)}";
-
                 UpdateSceneElement(sceneElement);
             }
         });
-
     }
 
     public void AddTextbox(TextBox textbox)
@@ -157,47 +123,32 @@ public class ElementsSettingManager : MonoBehaviour
         var elementsContainer = group.transform.Find("Elements");
         label.text = "Textbox Einstellungen";
 
-        var sceneElementHolder = textbox.GetComponent<SceneElementHolder>();
-        SceneElement sceneElement = sceneElementHolder.sceneElement;
+        var sceneElement = textbox.GetComponent<SceneElementHolder>()?.sceneElement;
 
-        var spriteSelector = Instantiate(prefabDictionary["SpriteSelector"], elementsContainer.transform).GetComponent<SpriteSelector>();
-
-        List<Pairs.SpritePair> spritePairs = new List<Pairs.SpritePair>();
+        var spriteSelector = Instantiate(prefabDictionary["SpriteSelector"], elementsContainer).GetComponent<SpriteSelector>();
+        var spritePairs = new List<Pairs.SpritePair>();
         string[] selectedSprites = { "warning", "question", "info", "play" };
-
-        foreach (string spriteName in selectedSprites)
-        {
+        foreach (var spriteName in selectedSprites)
             if (spriteDictionary.ContainsKey(spriteName))
-            {
                 spritePairs.Add(new Pairs.SpritePair { value = spriteName, sprite = spriteDictionary[spriteName] });
-            }
-        }
         spriteSelector.Initialize(spritePairs.ToArray(), textbox.iconName);
 
-        var textInput = Instantiate(prefabDictionary["TextInput"], elementsContainer.transform).GetComponent<TextInput>();
+        var textInput = Instantiate(prefabDictionary["TextArea"], elementsContainer).GetComponent<TextInput>();
         textInput.Initialize(textbox.textContent, "Text");
 
-        var colorPicker = Instantiate(prefabDictionary["ColorPicker"], elementsContainer.transform).GetComponent<ColorPicker>();
+        var colorPicker = Instantiate(prefabDictionary["ColorPicker"], elementsContainer).GetComponent<ColorPicker>();
         colorPicker.Initialize(textbox.color, "Farbe");
 
-        var toggleViewButton = Instantiate(prefabDictionary["Button"], elementsContainer.transform).GetComponent<Button>();
+        var toggleViewButton = Instantiate(prefabDictionary["Button"], elementsContainer).GetComponent<Button>();
         toggleViewButton.GetComponentInChildren<TMP_Text>().text = "Öffnen/Schließen";
-
         toggleViewButton.onClick.AddListener(() =>
         {
-            if (textbox.isOpen)
-            {
-                textbox.Unhighlight();
-            }
-            else
-            {
-                textbox.Highlight();
-            }
+            if (textbox.isOpen) textbox.Unhighlight();
+            else textbox.Highlight();
             Highlight(textbox.gameObject);
         });
 
-
-        spriteSelector.OnElementSelected.AddListener((value) =>
+        spriteSelector.OnElementSelected.AddListener(value =>
         {
             if (spriteDictionary.ContainsKey(value))
             {
@@ -207,11 +158,10 @@ public class ElementsSettingManager : MonoBehaviour
                     sceneElement.icon = value;
                     UpdateSceneElement(sceneElement);
                 }
-
             }
         });
 
-        textInput.OnValueChanged.AddListener((text) =>
+        textInput.OnValueChanged.AddListener(text =>
         {
             textbox.SetText(text);
             if (sceneElement != null)
@@ -221,7 +171,7 @@ public class ElementsSettingManager : MonoBehaviour
             }
         });
 
-        colorPicker.OnColorChange.AddListener((color) =>
+        colorPicker.OnColorChange.AddListener(color =>
         {
             textbox.SetColor(color);
             if (sceneElement != null)
@@ -230,7 +180,6 @@ public class ElementsSettingManager : MonoBehaviour
                 UpdateSceneElement(sceneElement);
             }
         });
-
     }
 
     public void AddText(TMP_Text text)
@@ -240,16 +189,15 @@ public class ElementsSettingManager : MonoBehaviour
         var elementsContainer = group.transform.Find("Elements");
         label.text = "Text Einstellungen";
 
-        var textInput = Instantiate(prefabDictionary["TextInput"], elementsContainer.transform).GetComponent<TextInput>();
+        var textInput = Instantiate(prefabDictionary["TextArea"], elementsContainer).GetComponent<TextInput>();
         textInput.Initialize(text.text, "Text");
 
-        var colorPicker = Instantiate(prefabDictionary["ColorPicker"], elementsContainer.transform).GetComponent<ColorPicker>();
+        var colorPicker = Instantiate(prefabDictionary["ColorPicker"], elementsContainer).GetComponent<ColorPicker>();
         colorPicker.Initialize(text.color, "Farbe");
 
-        var sceneElementHolder = text.GetComponent<SceneElementHolder>();
-        SceneElement sceneElement = sceneElementHolder.sceneElement;
+        var sceneElement = text.GetComponent<SceneElementHolder>()?.sceneElement;
 
-        textInput.OnValueChanged.AddListener((newText) =>
+        textInput.OnValueChanged.AddListener(newText =>
         {
             text.text = newText;
             if (sceneElement != null)
@@ -259,7 +207,7 @@ public class ElementsSettingManager : MonoBehaviour
             }
         });
 
-        colorPicker.OnColorChange.AddListener((color) =>
+        colorPicker.OnColorChange.AddListener(color =>
         {
             text.color = color;
             if (sceneElement != null)
@@ -273,38 +221,33 @@ public class ElementsSettingManager : MonoBehaviour
     public void AddDomePosition(DomePosition domePosition)
     {
         var domePositionInput = Instantiate(prefabDictionary["DomePosition"], sidebarContainer.transform).GetComponent<DomePositionInput>();
-        domePositionInput.Initialize(domePosition.position.x, domePosition.position.y, domePosition.distance, domePosition.xRotOffset);
+        domePositionInput.Initialize((int)domePosition.position.x, (int)domePosition.position.y, domePosition.distance, (int)domePosition.xRotOffset);
 
-
-        var sceneElementHolder = domePosition.GetComponent<SceneElementHolder>();
-        var sceneElement = sceneElementHolder.sceneElement;
+        var sceneElement = domePosition.GetComponent<SceneElementHolder>()?.sceneElement;
 
         domePositionInput.OnInputChanged.AddListener((x, y, distance, tilt) =>
         {
             domePosition.position = new Vector2(x, y);
-            domePosition.distance = (int)distance;
+            domePosition.distance = distance;
             domePosition.xRotOffset = tilt;
 
             if (sceneElement != null)
             {
-                sceneElement.x = (int)x;
-                sceneElement.y = (int)y;
-                sceneElement.distance = (int)distance;
-                sceneElement.xRotationOffset = (int)tilt;
-
+                sceneElement.x = x;
+                sceneElement.y = y;
+                sceneElement.distance = distance;
+                sceneElement.xRotationOffset = tilt;
                 UpdateSceneElement(sceneElement);
             }
-
         });
     }
 
     public void AddOnAction(Interactable interactable)
     {
-        SceneElement sceneElement = interactable.GetComponent<SceneElementHolder>().sceneElement;
-        string action = sceneElement.action;
+        var sceneElement = interactable.GetComponent<SceneElementHolder>()?.sceneElement;
+        string action = sceneElement?.action ?? "";
 
-        string pattern = @"toScene\((.*?)\)";
-        Match match = Regex.Match(action, pattern);
+        var match = Regex.Match(action, @"toScene\((.*?)\)");
         if (match.Success)
         {
             string sceneName = match.Groups[1].Value;
@@ -314,50 +257,32 @@ public class ElementsSettingManager : MonoBehaviour
             var elementsContainer = group.transform.Find("Elements");
             label.text = "Interaktion";
 
-            var dropdown = Instantiate(prefabDictionary["Dropdown"], elementsContainer.transform).GetComponent<DropdownInput>();
-
-            List<string> actionOptions = new List<string>();
-            var scenes = sceneManager.sceneList;
-
-            actionOptions.Add("Keine");
-            foreach (Scene scene in scenes.Values)
-            {
+            var dropdown = Instantiate(prefabDictionary["Dropdown"], elementsContainer).GetComponent<DropdownInput>();
+            var actionOptions = new List<string> { "Keine" };
+            foreach (var scene in sceneManager.sceneList.Values)
                 actionOptions.Add(scene.Name);
-            }
             dropdown.Initialize(actionOptions, sceneName, "Gehe zu");
 
-            var button = Instantiate(prefabDictionary["Button"], elementsContainer.transform).GetComponent<Button>();
+            var button = Instantiate(prefabDictionary["Button"], elementsContainer).GetComponent<Button>();
             button.GetComponentInChildren<TMP_Text>().text = "Aktion ausführen";
 
-            dropdown.OnValueChanged.AddListener((value) =>
+            dropdown.OnValueChanged.AddListener(value =>
             {
                 interactable.OnInteract.RemoveAllListeners();
                 if (value != "Keine")
                 {
                     interactable.OnInteract.AddListener(() =>
-                    {
-                        sceneChanger.ActionParser(sceneElement.action);
-                    }
-                );
+                        sceneChanger.ActionParser(sceneElement.action)
+                    );
                 }
                 if (sceneElement != null)
                 {
-                    if (value == "Keine")
-                    {
-                        sceneElement.action = "";
-                    }
-                    else
-                    {
-                        sceneElement.action = $"toScene({value})";
-                    }
+                    sceneElement.action = value == "Keine" ? "" : $"toScene({value})";
                     UpdateSceneElement(sceneElement);
                 }
             });
 
-            button.onClick.AddListener(() =>
-            {
-                interactable.OnInteract.Invoke();
-            });
+            button.onClick.AddListener(() => interactable.OnInteract.Invoke());
         }
     }
 
@@ -366,17 +291,32 @@ public class ElementsSettingManager : MonoBehaviour
         if (sceneChanger.currentScene.SceneElements.ContainsKey(sceneElement.id))
         {
             sceneChanger.currentScene.SceneElements[sceneElement.id] = sceneElement;
+            sceneChanger.currentScene.UnsavedChanges = true;
         }
     }
 
     public void Deselect(bool closeSidebar = false)
     {
         selector.target = null;
-
         if (closeSidebar)
-        {
             panelManager.CloseSidebar();
+    }
+
+    public void OpenSceneSettings(string sceneName)
+    {
+        ProcessIndicator.Show();
+        panelManager.SidebarSetActive(false);
+        ClearSidebar();
+        panelManager.SidebarSetActive(true);
+
+        var sceneSettings = Instantiate(prefabDictionary["SceneSettings"], sidebarContainer.transform).GetComponent<SceneSettings>();
+
+        if (sceneManager.sceneList.ContainsKey(sceneName))
+        {
+            var scene = sceneManager.sceneList[sceneName];
+            sceneSettings.Initialize(sceneName, scene.IsStartScene, scene.Source);
         }
+        ProcessIndicator.Hide();
     }
 
     void Update()
@@ -385,17 +325,11 @@ public class ElementsSettingManager : MonoBehaviour
         {
             if (UnityEngine.EventSystems.EventSystem.current != null &&
                 UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-            {
                 return;
-            }
 
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
-            {
-                GameObject target = hit.collider.gameObject;
-                Select(target);
-            }
+            if (Physics.Raycast(ray, out RaycastHit hit))
+                Select(hit.collider.gameObject);
         }
     }
 }

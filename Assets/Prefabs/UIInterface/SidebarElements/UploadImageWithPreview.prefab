@@ -460,7 +460,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 105}
+  m_SizeDelta: {x: 500, y: 105}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1214784431970370797
 MonoBehaviour:
@@ -527,6 +527,7 @@ MonoBehaviour:
   imagePath: {fileID: 7796277430558379899}
   label: {fileID: 4970069149180225180}
   labelText: 
+  animator: {fileID: 2738513965530507727}
   OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
