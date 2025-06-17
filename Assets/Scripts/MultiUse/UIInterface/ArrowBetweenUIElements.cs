@@ -13,15 +13,20 @@ public class ArrowBetweenUIElements : MonoBehaviour
     public RectTransform from;
     public RectTransform to;
     public Image arrowImage;
-    public float lineWidth = 4f;
+    public float lineWidth = 10f;
 
     public bool arrowsOnBothSides = false;
 
     private RectTransform arrowRect;
+    PanelManager panelManager;
 
     void Start()
     {
+        panelManager = FindObjectOfType<PanelManager>();
         arrowRect = arrowImage.GetComponent<RectTransform>();
+
+
+        GetComponent<Button>().onClick.AddListener(Click);
     }
 
     void LateUpdate()
@@ -61,6 +66,11 @@ public class ArrowBetweenUIElements : MonoBehaviour
         {
             arrowHeadImage2.gameObject.SetActive(false);
         }
+    }
+
+    void Click()
+    {
+        panelManager.SidebarSetActive(true);
     }
 
     Vector3 GetClosestEdgePoint(RectTransform from, Vector3 toPosition)

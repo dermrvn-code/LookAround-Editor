@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,14 @@ using UnityEngine.UI;
 
 public class PanelManager : MonoBehaviour
 {
+
+    public enum ViewType
+    {
+        Graph,
+        Scene
+    }
+
+    public ViewType currentViewType = ViewType.Scene;
 
     public GameObject topBar;
     public GameObject bottomBar;
@@ -22,13 +31,19 @@ public class PanelManager : MonoBehaviour
 
     SidebarSettingsManager sidebarSettingsManager;
 
+    Vector2 sideBarAnchorMin;
+
+    RectTransform sideBarRectTransform;
+
     void Start()
     {
         graphManager = graphPanel.GetComponent<GraphManager>();
         sidebarSettingsManager = FindObjectOfType<SidebarSettingsManager>();
         sceneManager = FindObjectOfType<SceneManager>();
 
-        sideBar.SetActive(false);
+        sideBarRectTransform = sideBar.GetComponent<RectTransform>();
+        sideBarAnchorMin = sideBar.GetComponent<RectTransform>().anchorMin;
+
         DomeSetActive(true);
         TopBarSetActive(true);
         BottomBarSetActive(true);
@@ -98,6 +113,18 @@ public class PanelManager : MonoBehaviour
 
     public void SidebarSetActive(bool isActive)
     {
+        if (isActive)
+        {
+            if (currentViewType == ViewType.Scene)
+            {
+                sideBarRectTransform.anchorMin = sideBarAnchorMin;
+            }
+            else
+            {
+                sideBarRectTransform.anchorMin = new Vector2(sideBarAnchorMin.x, 0);
+            }
+        }
+
         if (sideBar != null)
         {
             sideBar.GetComponent<Animator>().SetBool("visible", isActive);
@@ -122,6 +149,7 @@ public class PanelManager : MonoBehaviour
 
     public void SwitchToGraphPanel()
     {
+        currentViewType = ViewType.Graph;
         BottomBarSetActive(false);
         SidebarSetActive(false);
         DomeSetActive(false);
@@ -130,6 +158,7 @@ public class PanelManager : MonoBehaviour
 
     public void SwitchToScene()
     {
+        currentViewType = ViewType.Scene;
         BottomBarSetActive(true);
         SidebarSetActive(false);
         DomeSetActive(true);
