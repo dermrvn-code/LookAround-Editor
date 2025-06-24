@@ -5,6 +5,10 @@ using UnityEngine;
 
 public class Debugger : MonoBehaviour
 {
+
+    [SerializeField]
+    List<Scene> scenes = new List<Scene>();
+
     [SerializeField]
     Scene scene;
 
@@ -22,7 +26,22 @@ public class Debugger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        scene = sceneChanger.currentScene;
-        sceneElements = sceneManager.sceneList[scene.Name].SceneElements.Values.ToList();
+        if (sceneManager.sceneList.Count > 0)
+        {
+            scenes = sceneManager.sceneList.Values.ToList();
+        }
+        else
+        {
+            scenes.Clear();
+        }
+
+        if (sceneChanger.currentScene != null)
+        {
+            scene = sceneChanger.currentScene;
+            if (sceneManager.sceneList.ContainsKey(scene.Name))
+            {
+                sceneElements = sceneManager.sceneList[scene.Name].SceneElements.Values.ToList();
+            }
+        }
     }
 }

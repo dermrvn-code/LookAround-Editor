@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -57,6 +58,29 @@ public class SceneSettings : MonoBehaviour
         if (scene != null)
         {
             InfoText.ShowInfo("Szeneneinstellungen gespeichert.");
+        }
+    }
+
+    public void Delete()
+    {
+        if (sceneManager.sceneList.TryGetValue(initialName, out Scene scene))
+        {
+            sceneManager.sceneList.Remove(initialName);
+            if (scene.IsStartScene)
+            {
+                sceneManager.SetStartScene(sceneNameAvoid: initialName);
+            }
+
+            if (sceneChanger.currentScene.Name == initialName)
+            {
+                sceneChanger.SwitchSceneAnimation(sceneManager.GetStartScene());
+            }
+            panelManager.UpdateSceneList();
+            InfoText.ShowInfo("Szene gelöscht.");
+        }
+        else
+        {
+            InfoText.ShowInfo("Szene nicht gefunden.");
         }
     }
 

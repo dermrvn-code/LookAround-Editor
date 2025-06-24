@@ -47,6 +47,7 @@ public class SidebarSettingsManager : MonoBehaviour
     void Select(GameObject target)
     {
         Highlight(target);
+        Debug.Log($"Selected: {target.name}");
         ClearSidebar();
         panelManager.SidebarSetActive(true);
 
@@ -65,6 +66,10 @@ public class SidebarSettingsManager : MonoBehaviour
         if (target.TryGetComponent(out TMP_Text text))
             AddText(text);
 
+        if (target.TryGetComponent(out SceneElementHolder holder)) // always true, as functions checks target for SceneElementHolder
+            AddDeleteElement(holder);                              // maybe add other check later, it needed, for now every element can be deleted
+
+
         var contentSizeFitter = sidebarContainer.GetComponent<ContentSizeFitter>();
         var layoutGroup = sidebarContainer.GetComponent<VerticalLayoutGroup>();
 
@@ -80,6 +85,25 @@ public class SidebarSettingsManager : MonoBehaviour
     void Highlight(GameObject target)
     {
         selector.target = target;
+    }
+
+    public void AddDeleteElement(SceneElementHolder holder)
+    {
+        var group = Instantiate(prefabDictionary["Group"], sidebarContainer.transform);
+        var label = group.GetComponentInChildren<TMP_Text>();
+        var elementsContainer = group.transform.Find("Elements");
+        label.text = "Element Einstellungen";
+
+        var deleteButton = Instantiate(prefabDictionary["Button"], elementsContainer).GetComponent<Button>();
+        deleteButton.GetComponentInChildren<TMP_Text>().text = "Löschen";
+        deleteButton.GetComponent<Image>().color = new Color(1f, 0.5f, 0.5f, 1f); // light red
+        deleteButton.onClick.AddListener(() =>
+        {
+            sceneChanger.currentScene.SceneElements.Remove(holder.sceneElement.id);
+            Destroy(holder.gameObject);
+            Deselect();
+            panelManager.CloseSidebar();
+        });
     }
 
     public void AddArrow(InteractableArrow arrow)
@@ -377,7 +401,27 @@ public class SidebarSettingsManager : MonoBehaviour
 
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
-                Select(hit.collider.gameObject);
+            {
+                GameObject target = hit.collider.gameObject;
+                Debug.Log($"Clicked on: {target.name}");
+                if (target.TryGetComponent(out SceneElementHolder _))
+                {
+                    Select(target);
+                }
+                else
+                {
+                    var parent = target.transform.parent;
+                    while (parent != null && !parent.TryGetComponent<SceneElementHolder>(out _))
+                    {
+                        parent = parent.parent;
+                    }
+                    if (parent != null)
+                    {
+                        Select(parent.gameObject);
+                    }
+                }
+            }
+
         }
     }
 }

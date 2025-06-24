@@ -185,6 +185,18 @@ public class SceneManager : MonoBehaviour
         return sceneObj;
     }
 
+    public Scene GetStartScene()
+    {
+        foreach (var scene in sceneList.Values)
+        {
+            if (scene.IsStartScene)
+            {
+                return scene;
+            }
+        }
+        return null;
+    }
+
     public void SetStartScene(string sceneName = "", string sceneNameAvoid = "")
     {
         if (!string.IsNullOrEmpty(sceneName))
