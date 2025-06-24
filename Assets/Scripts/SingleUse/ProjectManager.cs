@@ -7,7 +7,11 @@ using UnityEngine;
 
 public class ProjectManager : MonoBehaviour
 {
-    private string projectsPath = "C:/.code/mavel/LookAround-Editor/Projects";
+    private string projectsPath;
+    public string ProjectsPath
+    {
+        get { return projectsPath; }
+    }
     public string currentSceneOverview = "";
     public string currentProjectName = "";
     public string currentAuthorName = "Default Author";
@@ -25,6 +29,11 @@ public class ProjectManager : MonoBehaviour
     private SceneManager sceneManager;
     private SceneChanger sceneChanger;
     private PanelManager panelManager;
+
+    void Awake()
+    {
+        UpdateProjectsFolder();
+    }
 
     void Start()
     {
@@ -171,6 +180,21 @@ public class ProjectManager : MonoBehaviour
             loader.gameObject.SetActive(false);
         }
 
+    }
+
+    public void UpdateProjectsFolder()
+    {
+        string newPath = PlayerPrefs.GetString("ProjectsFolder", "");
+        Debug.Log(newPath);
+        if (Directory.Exists(newPath))
+        {
+            projectsPath = newPath;
+        }
+        else
+        {
+            Debug.LogWarning("Der angegebene Pfad existiert nicht: " + newPath);
+            projectsPath = "";
+        }
     }
 
     public void OpenProjectFolderBrowser()

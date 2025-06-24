@@ -130,6 +130,11 @@ public class PanelManager : MonoBehaviour
         }
     }
 
+    public void OpenAppSetings()
+    {
+        sidebarSettingsManager.OpenAppSettings();
+    }
+
     public void SidebarSetActive(bool isActive)
     {
         if (isActive)

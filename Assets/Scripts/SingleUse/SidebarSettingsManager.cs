@@ -382,6 +382,21 @@ public class SidebarSettingsManager : MonoBehaviour
         ProcessIndicator.Hide();
     }
 
+    public void OpenAppSettings()
+    {
+        ProcessIndicator.Show();
+        panelManager.SidebarSetActive(false);
+        ClearSidebar();
+        panelManager.SidebarSetActive(true);
+
+        var appSettings = Instantiate(prefabDictionary["AppSettings"], sidebarContainer.transform).GetComponent<AppSettings>();
+
+        appSettings.Initialize(projectManager.ProjectsPath);
+        
+        ReloadLayout();
+        ProcessIndicator.Hide();
+    }
+
     string[] funnySceneNames = new string[]
     {
         "TatooineSundown",
