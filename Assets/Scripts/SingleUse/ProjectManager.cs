@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.RegularExpressions;
 using SFB;
 using TMPro;
@@ -8,6 +9,7 @@ public class ProjectManager : MonoBehaviour
     private string projectsPath = "C:/.code/mavel/LookAround-Editor/Projects";
     public string currentSceneOverview = "";
     public string currentProjectName = "";
+    public string currentFolderPath = "";
 
     private bool isInProject = false;
 
@@ -55,7 +57,8 @@ public class ProjectManager : MonoBehaviour
 
     void LoadProject(string path)
     {
-        var folderName = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(path));
+        currentFolderPath = Path.GetDirectoryName(path);
+        var folderName = Path.GetFileName(currentFolderPath);
         currentProjectName = CaseToSpace(folderName);
         currentSceneOverview = path;
         loader.gameObject.SetActive(true);

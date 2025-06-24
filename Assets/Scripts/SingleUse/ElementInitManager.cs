@@ -64,6 +64,7 @@ public class ElementInitManager : MonoBehaviour
 
         SceneElement sceneElement = new SceneElement
         {
+            type = SceneElement.ElementType.Text,
             x = (int)position,
             y = 0,
             distance = 8,
@@ -93,6 +94,7 @@ public class ElementInitManager : MonoBehaviour
 
         SceneElement sceneElement = new SceneElement
         {
+            type = SceneElement.ElementType.DirectionArrow,
             x = (int)position,
             y = 0,
             distance = 8,
@@ -123,6 +125,7 @@ public class ElementInitManager : MonoBehaviour
 
         SceneElement sceneElement = new SceneElement
         {
+            type = SceneElement.ElementType.Textbox,
             x = (int)position,
             y = 0,
             distance = 8,
@@ -148,8 +151,14 @@ public class ElementInitManager : MonoBehaviour
         int maxKey = 0;
         if (elements.Count > 0)
         {
-            maxKey = Mathf.Max(elements.Keys.ToList().ToArray());
+            maxKey = Mathf.Max(elements.Keys.ToArray());
+            foreach (var i in elements.Values)
+            {
+                Debug.Log(i);
+            }
         }
-        elements[maxKey + 1] = sceneElement;
+        int id = maxKey + 1;
+        sceneElement.id = id;
+        elements[id] = sceneElement;
     }
 }

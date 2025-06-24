@@ -298,7 +298,7 @@ public class SidebarSettingsManager : MonoBehaviour
         if (sceneChanger.currentScene.SceneElements.ContainsKey(sceneElement.id))
         {
             sceneChanger.currentScene.SceneElements[sceneElement.id] = sceneElement;
-            sceneChanger.currentScene.UnsavedChanges = true;
+            sceneChanger.currentScene.HasUnsavedChanges = true;
         }
     }
 

@@ -41,7 +41,6 @@ public class SceneSettings : MonoBehaviour
         {
             if (!string.IsNullOrEmpty(value))
             {
-                Debug.Log("Image path changed to: " + value);
                 if (CheckIfLiveUpdatable()) sceneChanger.UpateMedium(value);
             }
         });
@@ -149,7 +148,7 @@ public class SceneSettings : MonoBehaviour
         {
             sceneManager.sceneList.Remove(initialName);
         }
-        scene.UnsavedChanges = true;
+        scene.HasUnsavedChanges = true;
         panelManager.UpdateSceneList();
         ProcessIndicator.Hide();
         SetInitials(sceneName, isStartScene, filePath, (int)offset.x, (int)offset.y);
@@ -175,7 +174,7 @@ public class SceneSettings : MonoBehaviour
         initialOffset = new Vector2(xOffset, yOffset);
     }
 
-    public void Initialize(string sceneName, bool isStartScene, string filePath, int xOffset = 0, int yOffset = 250)
+    public void Initialize(string sceneName, bool isStartScene, string filePath, int xOffset = 0, int yOffset = 180)
     {
         SetInitials(sceneName, isStartScene, filePath, xOffset, yOffset);
 

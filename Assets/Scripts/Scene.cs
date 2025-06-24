@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using UnityEngine;
 
+[System.Serializable]
 public class Scene
 {
-    public bool UnsavedChanges { get; set; } = false;
+    public bool HasUnsavedChanges { get; set; } = false;
 
     public enum MediaType { Video, Photo };
     public MediaType Type
@@ -34,13 +36,18 @@ public class Scene
         get => _yOffset;
     }
 
-
+    [SerializeField]
     MediaType _type;
+    [SerializeField]
     string _name;
+    [SerializeField]
     string _source;
     Dictionary<int, SceneElement> _sceneElements;
+    [SerializeField]
     bool _isStartScene;
+    [SerializeField]
     float _xOffset;
+    [SerializeField]
     float _yOffset;
 
     public Scene(MediaType type, string name, string source, Dictionary<int, SceneElement> sceneElements, bool isStartScene, float xOffset = 0, float yOffset = 0)
@@ -71,5 +78,10 @@ public class Scene
     public void SetStartScene(bool isStartScene)
     {
         _isStartScene = isStartScene;
+    }
+
+    public void SetSource(string source)
+    {
+        _source = source;
     }
 }

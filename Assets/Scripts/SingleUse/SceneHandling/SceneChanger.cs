@@ -174,7 +174,6 @@ public class SceneChanger : MonoBehaviour
             newOffset = photoMaterial.mainTextureOffset;
             if (xOffset != null) newOffset.x = xOffset.Value;
             if (yOffset != null) newOffset.y = yOffset.Value;
-            Debug.Log(newOffset);
             photoMaterial.mainTextureOffset = newOffset;
         }
     }
@@ -191,11 +190,11 @@ public class SceneChanger : MonoBehaviour
         else if (currentScene.Type == Scene.MediaType.Photo)
         {
             StartCoroutine(textureManager.GetTexture(path, texture =>
-                    {
-                        Debug.Log("Updating photo texture to: " + path);
-                        photoMaterial.mainTexture = texture;
-                        SwitchToFoto(); ;
-                    }));
+                {
+                    photoMaterial.mainTexture = texture;
+                    SwitchToFoto(); ;
+                }
+            ));
         }
     }
 

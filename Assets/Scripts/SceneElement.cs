@@ -1,3 +1,6 @@
+
+
+[System.Serializable]
 public class SceneElement
 {
     public int id;

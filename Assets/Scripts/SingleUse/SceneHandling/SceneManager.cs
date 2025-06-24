@@ -174,6 +174,7 @@ public class SceneManager : MonoBehaviour
             }
             if (se != null)
             {
+                se.id = idCounter;
                 sceneElements.Add(idCounter, se);
             }
             idCounter++;
