@@ -25,7 +25,7 @@ public class SceneManager : MonoBehaviour
     }
 
     List<string> texturePaths;
-    public void LoadSceneOverview(string sceneOverviewPath, Loader loadingBar, Action onComplete)
+    public bool LoadSceneOverview(string sceneOverviewPath, Loader loadingBar, Action onComplete)
     {
         texturePaths = new List<string>();
         textureManager.ReleaseAllTextures();
@@ -33,36 +33,45 @@ public class SceneManager : MonoBehaviour
         sceneList = new Dictionary<string, Scene>();
         if (!File.Exists(sceneOverviewPath)) Debug.LogWarning("The scene overview file does not exist: " + sceneOverviewPath);
         sceneOverview = XDocument.Load(sceneOverviewPath);
-        var scenes = sceneOverview.Descendants("Scene");
 
-        int counter = 0;
-        foreach (var scene in scenes)
+        try
         {
-            string scenePath = scene.Attribute("path").Value;
-            string sceneName = scene.Attribute("name").Value;
+            var scenesList = sceneOverview.Root.Element("Scenes");
+            var scenes = scenesList.Descendants("Scene");
 
-            var startScene = scene.Attribute("startScene");
-            bool isStartScene = false;
-            if (startScene != null)
+            int counter = 0;
+            foreach (var scene in scenes)
             {
-                if (startScene.Value.ToLower() == "true") isStartScene = true;
+                string scenePath = scene.Attribute("path").Value;
+                string sceneName = scene.Attribute("name").Value;
+
+                var startScene = scene.Attribute("startScene");
+                bool isStartScene = false;
+                if (startScene != null)
+                {
+                    if (startScene.Value.ToLower() == "true") isStartScene = true;
+                }
+
+                string sceneFolder = Path.GetDirectoryName(sceneOverviewPath);
+                Scene s = LoadScene(sceneName, sceneFolder, scenePath, isStartScene);
+
+                if (s.Type != Scene.MediaType.Photo) return false;
+
+                if (s.IsStartScene)
+                {
+                    texturePaths.Insert(0, s.Source);
+                }
+                else
+                {
+                    texturePaths.Add(s.Source);
+                }
+
+                counter++;
             }
-
-            string sceneFolder = Path.GetDirectoryName(sceneOverviewPath);
-            Scene s = LoadScene(sceneName, sceneFolder, scenePath, isStartScene);
-
-            if (s.Type != Scene.MediaType.Photo) return;
-
-            if (s.IsStartScene)
-            {
-                texturePaths.Insert(0, s.Source);
-            }
-            else
-            {
-                texturePaths.Add(s.Source);
-            }
-
-            counter++;
+        }
+        catch
+        {
+            return false;
         }
 
         StartCoroutine(textureManager.LoadAllTextures(texturePaths, loadingBar, () =>
@@ -70,6 +79,7 @@ public class SceneManager : MonoBehaviour
             Debug.Log("Textures preloaded!");
             onComplete?.Invoke();
         }));
+        return true;
     }
 
     Scene LoadScene(string sceneName, string mainFolder, string scenePath, bool isStartScene)

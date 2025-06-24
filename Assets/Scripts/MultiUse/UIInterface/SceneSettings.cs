@@ -21,12 +21,14 @@ public class SceneSettings : MonoBehaviour
     SceneManager sceneManager;
     SceneChanger sceneChanger;
     PanelManager panelManager;
+    ProjectManager projectManager;
 
     void Start()
     {
         sceneManager = FindObjectOfType<SceneManager>();
         sceneChanger = FindObjectOfType<SceneChanger>();
         panelManager = FindObjectOfType<PanelManager>();
+        projectManager = FindObjectOfType<ProjectManager>();
 
         xOffsetInput.OnValueChanged.AddListener((value) =>
         {
@@ -173,6 +175,7 @@ public class SceneSettings : MonoBehaviour
             sceneManager.sceneList.Remove(initialName);
         }
         scene.HasUnsavedChanges = true;
+        projectManager.unsavedChanges = true;
         panelManager.UpdateSceneList();
         ProcessIndicator.Hide();
         SetInitials(sceneName, isStartScene, filePath, (int)offset.x, (int)offset.y);

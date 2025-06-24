@@ -69,7 +69,11 @@ public class SidebarSettingsManager : MonoBehaviour
         if (target.TryGetComponent(out SceneElementHolder holder)) // always true, as functions checks target for SceneElementHolder
             AddDeleteElement(holder);                              // maybe add other check later, it needed, for now every element can be deleted
 
+        ReloadLayout();
+    }
 
+    void ReloadLayout()
+    {
         var contentSizeFitter = sidebarContainer.GetComponent<ContentSizeFitter>();
         var layoutGroup = sidebarContainer.GetComponent<VerticalLayoutGroup>();
 
@@ -323,6 +327,7 @@ public class SidebarSettingsManager : MonoBehaviour
         {
             sceneChanger.currentScene.SceneElements[sceneElement.id] = sceneElement;
             sceneChanger.currentScene.HasUnsavedChanges = true;
+            projectManager.unsavedChanges = true;
         }
     }
 
@@ -350,8 +355,33 @@ public class SidebarSettingsManager : MonoBehaviour
 
             sceneSettings.Initialize(sceneName, scene.IsStartScene, scene.Source, (int)offset.x, (int)offset.y);
         }
+        ReloadLayout();
         ProcessIndicator.Hide();
     }
+
+    public void OpenWorldSettings(bool newWorld = false)
+    {
+        ProcessIndicator.Show();
+        panelManager.SwitchToScene();
+        panelManager.SidebarSetActive(false);
+        ClearSidebar();
+        panelManager.SidebarSetActive(true);
+
+        var worldSettings = Instantiate(prefabDictionary["WorldSettings"], sidebarContainer.transform).GetComponent<WorldSettings>();
+        worldSettings.newWorld = newWorld;
+
+        if (!newWorld)
+        {
+            worldSettings.InitializeWorldSettings(
+                projectManager.currentProjectName,
+                projectManager.currentAuthorName,
+                projectManager.currentProjectDescription
+            );
+        }
+        ReloadLayout();
+        ProcessIndicator.Hide();
+    }
+
     string[] funnySceneNames = new string[]
     {
         "TatooineSundown",

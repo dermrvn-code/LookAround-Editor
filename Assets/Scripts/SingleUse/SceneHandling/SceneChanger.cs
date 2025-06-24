@@ -47,8 +47,19 @@ public class SceneChanger : MonoBehaviour
         Application.Quit();
     }
 
+    public void ToMainSceneAnimation()
+    {
+        TransitionParticles((sceneLoaded) =>
+            {
+                ToMainScene();
+                sceneLoaded?.Invoke();
+            }
+        );
+    }
+
     public void ToMainScene()
     {
+        ClearSceneElements();
         photoMaterial.mainTexture = mainScreenImage;
         photoMaterial.mainTextureOffset = new Vector2(0, 0);
 
@@ -198,10 +209,8 @@ public class SceneChanger : MonoBehaviour
         }
     }
 
-    public void LoadSceneElements(Dictionary<int, SceneElement> sceneElementsDict)
+    public void ClearSceneElements()
     {
-        List<SceneElement> sceneElements = new List<SceneElement>(sceneElementsDict.Values);
-
         var children = new List<GameObject>();
         foreach (Transform child in sceneElementsContainer.transform) children.Add(child.gameObject);
         if (Application.isPlaying)
@@ -213,6 +222,12 @@ public class SceneChanger : MonoBehaviour
             children.ForEach(child => DestroyImmediate(child));
         }
 
+    }
+
+    public void LoadSceneElements(Dictionary<int, SceneElement> sceneElementsDict)
+    {
+        ClearSceneElements();
+        List<SceneElement> sceneElements = new List<SceneElement>(sceneElementsDict.Values);
 
         foreach (var sceneElement in sceneElements)
         {

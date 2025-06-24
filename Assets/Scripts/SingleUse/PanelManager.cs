@@ -28,6 +28,7 @@ public class PanelManager : MonoBehaviour
 
     GraphManager graphManager;
     SceneManager sceneManager;
+    ProjectManager projectManager;
 
     SidebarSettingsManager sidebarSettingsManager;
 
@@ -40,6 +41,7 @@ public class PanelManager : MonoBehaviour
         graphManager = graphPanel.GetComponent<GraphManager>();
         sidebarSettingsManager = FindObjectOfType<SidebarSettingsManager>();
         sceneManager = FindObjectOfType<SceneManager>();
+        projectManager = FindObjectOfType<ProjectManager>();
 
         sideBarRectTransform = sideBar.GetComponent<RectTransform>();
         sideBarAnchorMin = sideBar.GetComponent<RectTransform>().anchorMin;
@@ -108,6 +110,23 @@ public class PanelManager : MonoBehaviour
             {
                 sidebarSettingsManager.OpenSceneSettings(scene.Name);
             });
+        }
+    }
+
+    public void AddWorld()
+    {
+        sidebarSettingsManager.OpenWorldSettings(newWorld: true);
+    }
+
+    public void OpenWorldSettings()
+    {
+        if (projectManager.IsInProject())
+        {
+            sidebarSettingsManager.OpenWorldSettings(newWorld: false);
+        }
+        else
+        {
+            InfoText.ShowInfo("Lade ein Projekt, um die Welteinstellungen zu bearbeiten.");
         }
     }
 
