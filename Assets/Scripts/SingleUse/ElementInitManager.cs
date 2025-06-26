@@ -152,10 +152,6 @@ public class ElementInitManager : MonoBehaviour
         if (elements.Count > 0)
         {
             maxKey = Mathf.Max(elements.Keys.ToArray());
-            foreach (var i in elements.Values)
-            {
-                Debug.Log(i);
-            }
         }
         int id = maxKey + 1;
         sceneElement.id = id;

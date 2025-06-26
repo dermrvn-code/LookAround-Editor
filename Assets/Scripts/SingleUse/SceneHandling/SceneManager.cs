@@ -24,13 +24,13 @@ public class SceneManager : MonoBehaviour
         sc.ToMainScene();
     }
 
-    List<string> texturePaths;
+    List<string> texturePaths = new List<string>();
     public bool LoadSceneOverview(string sceneOverviewPath, Loader loadingBar, Action onComplete)
     {
-        texturePaths = new List<string>();
+        texturePaths.Clear();
         textureManager.ReleaseAllTextures();
 
-        sceneList = new Dictionary<string, Scene>();
+        sceneList.Clear();
         if (!File.Exists(sceneOverviewPath)) Debug.LogWarning("The scene overview file does not exist: " + sceneOverviewPath);
         sceneOverview = XDocument.Load(sceneOverviewPath);
 
@@ -55,22 +55,24 @@ public class SceneManager : MonoBehaviour
                 string sceneFolder = Path.GetDirectoryName(sceneOverviewPath);
                 Scene s = LoadScene(sceneName, sceneFolder, scenePath, isStartScene);
 
-                if (s.Type != Scene.MediaType.Photo) return false;
-
-                if (s.IsStartScene)
+                if (s.Type == Scene.MediaType.Photo)
                 {
-                    texturePaths.Insert(0, s.Source);
-                }
-                else
-                {
-                    texturePaths.Add(s.Source);
+                    if (s.IsStartScene)
+                    {
+                        texturePaths.Insert(0, s.Source);
+                    }
+                    else
+                    {
+                        texturePaths.Add(s.Source);
+                    }
                 }
 
                 counter++;
             }
         }
-        catch
+        catch (Exception e)
         {
+            Debug.LogError("Error loading scene overview: " + e.Message);
             return false;
         }
 
@@ -191,6 +193,7 @@ public class SceneManager : MonoBehaviour
         }
         Scene sceneObj = new Scene(type == "video" ? Scene.MediaType.Video : Scene.MediaType.Photo, sceneName, source, sceneElements, isStartScene, xOffset, yOffset);
 
+        Debug.Log("Scene loaded" + sceneName);
         sceneList.Add(sceneName, sceneObj);
         return sceneObj;
     }

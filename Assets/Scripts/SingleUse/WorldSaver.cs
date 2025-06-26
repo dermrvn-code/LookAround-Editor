@@ -98,7 +98,7 @@ public class WorldSaver : MonoBehaviour
         }
         catch (IOException e)
         {
-            Debug.LogError($"Failed to move unused scene directory {folderPath} to trash: {e.Message}");
+            Debug.LogWarning($"Failed to move unused scene directory {folderPath} to trash: {e.Message}");
         }
     }
 
@@ -117,12 +117,7 @@ public class WorldSaver : MonoBehaviour
             if (!sceneManager.sceneList.ContainsKey(sceneName))
             {
                 MoveToTrash(directory);
-                Debug.Log($"Deleting unused scene directory: {directory}");
                 deleted = true;
-            }
-            else
-            {
-                Debug.Log($"Scene {sceneName} is still in use. Not deleting.");
             }
         }
         return deleted;
@@ -147,12 +142,11 @@ public class WorldSaver : MonoBehaviour
                 File.Delete(destinationPath);
             }
             File.Copy(source, destinationPath);
-            Debug.Log($"Copied medium from {source} to {destinationPath}");
             return destFile;
         }
         catch (IOException e)
         {
-            Debug.LogError($"Failed to copy medium from {source} to {destinationPath}: {e.Message}");
+            Debug.LogWarning($"Failed to copy medium from {source} to {destinationPath}: {e.Message}");
             return null;
         }
     }
@@ -176,7 +170,7 @@ public class WorldSaver : MonoBehaviour
         XDocument doc = ParseScene(scene, file);
         if (doc == null)
         {
-            Debug.LogError("Failed to parse scene: " + scene.Name);
+            Debug.LogWarning("Failed to parse scene: " + scene.Name);
             return;
         }
 
@@ -184,11 +178,10 @@ public class WorldSaver : MonoBehaviour
         try
         {
             doc.Save(filePath);
-            Debug.Log($"Scene {scene.Name} saved successfully at {filePath}");
         }
         catch (IOException e)
         {
-            Debug.LogError($"Failed to save scene {scene.Name}: {e.Message}");
+            Debug.LogWarning($"Failed to save scene {scene.Name}: {e.Message}");
         }
     }
 
@@ -241,7 +234,7 @@ public class WorldSaver : MonoBehaviour
             }
             catch (IOException e)
             {
-                Debug.LogError($"Failed to save overview: {e.Message}");
+                Debug.LogWarning($"Failed to save overview: {e.Message}");
             }
         }
     }
@@ -273,7 +266,7 @@ public class WorldSaver : MonoBehaviour
                 sceneElement.SetAttributeValue("type", "image");
                 break;
             default:
-                Debug.LogError("Unknown media type: " + scene.Type);
+                Debug.LogWarning("Unknown media type: " + scene.Type);
                 return null;
         }
 
@@ -287,7 +280,6 @@ public class WorldSaver : MonoBehaviour
     {
         foreach (var element in sceneElements.Values)
         {
-            Debug.Log("Parsing: " + element.ToString());
             XElement elementNode = new XElement("Element");
             elementNode.SetAttributeValue("x", element.x.ToString());
             elementNode.SetAttributeValue("y", element.y.ToString());

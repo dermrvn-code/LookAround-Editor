@@ -19,7 +19,7 @@ public class SpriteHolder : MonoBehaviour
     {
         if (iconSprites.Length != iconNames.Length)
         {
-            Debug.LogError("Amount of icons and mapped icon names dont Work");
+            Debug.LogError("Amount of icons and mapped icon names don't match");
             return;
         }
 

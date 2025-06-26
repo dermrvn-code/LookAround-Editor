@@ -38,18 +38,7 @@ public class ProjectManager : MonoBehaviour
     void Start()
     {
         sceneManager = FindObjectOfType<SceneManager>();
-        if (sceneManager == null)
-        {
-            Debug.LogError("SceneManager not found in the scene.");
-            return;
-        }
-
         sceneChanger = FindObjectOfType<SceneChanger>();
-        if (sceneChanger == null)
-        {
-            Debug.LogError("SceneChanger not found in the scene.");
-            return;
-        }
         panelManager = FindObjectOfType<PanelManager>();
     }
 
@@ -104,7 +93,6 @@ public class ProjectManager : MonoBehaviour
         {
             worldFolderPath = Path.Combine(projectsPath, SpaceToCase(name));
 
-            Debug.Log(SpaceToCase(name));
             if (Directory.Exists(worldFolderPath))
             {
                 InfoText.ShowInfo("Eine Welt mit diesem Namen existiert bereits.");
@@ -129,7 +117,6 @@ public class ProjectManager : MonoBehaviour
                 }
 
                 string oldFolderPath = Path.Combine(parentFolderPath, SpaceToCase(initialProjectName));
-                Debug.Log(Directory.Exists(oldFolderPath));
                 if (Directory.Exists(oldFolderPath))
                 {
                     Directory.Move(oldFolderPath, worldFolderPath);
@@ -155,6 +142,7 @@ public class ProjectManager : MonoBehaviour
 
     void LoadProject(string path)
     {
+        ClearWindow();
         if (!File.Exists(path) || Path.GetExtension(path).ToLower() != ".xml")
         {
             InfoText.ShowInfo("Bitte wählen Sie eine gültige XML-Datei aus.");
@@ -176,6 +164,7 @@ public class ProjectManager : MonoBehaviour
         });
         if (!success)
         {
+            sceneChanger.ToMainScene();
             InfoText.ShowInfo("Fehler beim Laden der Szenenübersicht. Bitte überprüfe die Datei.");
             loader.gameObject.SetActive(false);
         }
@@ -185,7 +174,6 @@ public class ProjectManager : MonoBehaviour
     public void UpdateProjectsFolder()
     {
         string newPath = PlayerPrefs.GetString("ProjectsFolder", "");
-        Debug.Log(newPath);
         if (Directory.Exists(newPath))
         {
             projectsPath = newPath;
@@ -210,6 +198,7 @@ public class ProjectManager : MonoBehaviour
 
     public void ClearWindow()
     {
+        bool isOnMainScene = !isInProject;
         currentSceneOverview = "";
         currentProjectName = "";
         currentAuthorName = "";
@@ -229,7 +218,15 @@ public class ProjectManager : MonoBehaviour
 
         sceneManager.sceneList.Clear();
         sceneChanger.currentScene = null;
-        sceneChanger.ToMainSceneAnimation();
+
+        if (isOnMainScene)
+        {
+            sceneChanger.ToMainScene();
+        }
+        else
+        {
+            sceneChanger.ToMainSceneAnimation();
+        }
         panelManager.UpdateSceneList();
     }
 }

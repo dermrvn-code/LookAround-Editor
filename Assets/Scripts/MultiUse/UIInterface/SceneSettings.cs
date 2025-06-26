@@ -14,7 +14,7 @@ public class SceneSettings : MonoBehaviour
 
     public TextInput sceneNameInput;
     public ToggleInput startSceneToggle;
-    public ImageUploader imageUploader;
+    public MediaUploader mediaUploader;
     public SliderAndInput xOffsetInput;
     public SliderAndInput yOffsetInput;
 
@@ -40,7 +40,7 @@ public class SceneSettings : MonoBehaviour
             if (CheckIfLiveUpdatable()) sceneChanger.UpdateOffset(yOffset: MapOffsetToDotted(0, value).y);
         });
 
-        imageUploader.OnValueChanged.AddListener((value) =>
+        mediaUploader.OnValueChanged.AddListener((value) =>
         {
             if (!string.IsNullOrEmpty(value))
             {
@@ -51,6 +51,10 @@ public class SceneSettings : MonoBehaviour
 
     bool CheckIfLiveUpdatable()
     {
+        if (sceneChanger.currentScene == null)
+        {
+            return false;
+        }
         return sceneChanger.currentScene.Name == initialName;
     }
 
@@ -106,7 +110,14 @@ public class SceneSettings : MonoBehaviour
     {
         string sceneName = sceneNameInput.value;
         bool isStartScene = startSceneToggle.value;
-        string filePath = imageUploader.value;
+        string filePath = mediaUploader.value;
+
+        bool isImage = true;
+        if (filePath.EndsWith(".mp4") || filePath.EndsWith(".avi") || filePath.EndsWith(".mov"))
+        {
+            isImage = false;
+        }
+
         Vector2 offset = new Vector2(
             xOffsetInput.value,
             yOffsetInput.value
@@ -152,10 +163,16 @@ public class SceneSettings : MonoBehaviour
             InfoText.ShowInfo("Es wurde kein Medium ausgewählt.");
             return null;
         }
+
+
+        if (sceneName != initialName)
+        {
+            sceneManager.sceneList.Remove(initialName);
+        }
         if (scene == null || sceneName != initialName)
         {
             scene = new Scene(
-                Scene.MediaType.Photo,
+                isImage ? Scene.MediaType.Photo : Scene.MediaType.Video,
                 sceneName,
                 filePath,
                 new Dictionary<int, SceneElement>(),
@@ -168,11 +185,6 @@ public class SceneSettings : MonoBehaviour
         else
         {
             scene.SetValues(sceneName, filePath, isStartScene, offsetMapped.x, offsetMapped.y);
-        }
-
-        if (sceneName != initialName)
-        {
-            sceneManager.sceneList.Remove(initialName);
         }
         scene.HasUnsavedChanges = true;
         projectManager.unsavedChanges = true;
@@ -207,7 +219,7 @@ public class SceneSettings : MonoBehaviour
 
         sceneNameInput.Initialize(sceneName);
         startSceneToggle.Initialize(isStartScene);
-        imageUploader.Initialize(filePath);
+        mediaUploader.Initialize(filePath);
         xOffsetInput.Initialize(xOffset);
         yOffsetInput.Initialize(yOffset);
     }

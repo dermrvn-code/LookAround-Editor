@@ -1608,7 +1608,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneNameInput: {fileID: 6589760069717141140}
   startSceneToggle: {fileID: 2301761502139127956}
-  imageUploader: {fileID: 1096538391472195572}
+  mediaUploader: {fileID: 1096538391472195572}
   xOffsetInput: {fileID: 5226511837039515978}
   yOffsetInput: {fileID: 1736939572391182491}
 --- !u!224 &9212491492222590730 stripped
@@ -1706,7 +1706,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1948010148599661524, guid: bf0daef0027f02c40bc0315fa6601c84, type: 3}
       propertyPath: m_Name
-      value: UploadImageWithPreview
+      value: UploadMediaWithPreview
       objectReference: {fileID: 0}
     - target: {fileID: 2738513965530507727, guid: bf0daef0027f02c40bc0315fa6601c84, type: 3}
       propertyPath: m_Enabled

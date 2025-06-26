@@ -2663,7 +2663,7 @@ MonoBehaviour:
     prefab: {fileID: 5488275689971201158, guid: 0d31af3e20c9d10489a91efc13c94171, type: 3}
   - value: TextArea
     prefab: {fileID: 3044763594593059980, guid: d4b30fed03102ff4586dec16065425e7, type: 3}
-  - value: UploadImage
+  - value: UploadMedia
     prefab: {fileID: 1948010148599661524, guid: bf0daef0027f02c40bc0315fa6601c84, type: 3}
   - value: SelectFolder
     prefab: {fileID: 5359405550222569827, guid: 6eae76136024d0240afa503ef570af77, type: 3}
@@ -2677,6 +2677,8 @@ MonoBehaviour:
     prefab: {fileID: 5654699485857072216, guid: b6085842b0ace85469c65e7cceb80a3a, type: 3}
   - value: WorldSettings
     prefab: {fileID: 5432736992624068385, guid: 9cbf36bfd5e203544b6789e31af289a9, type: 3}
+  - value: AppSettings
+    prefab: {fileID: 7994493673729587869, guid: 1dfe99c163715064b85178c1ae33c14b, type: 3}
   sprites:
   - value: direction
     sprite: {fileID: 21300000, guid: 870d056e88f93484c9af33bc95727da1, type: 3}
@@ -3225,7 +3227,7 @@ VideoPlayer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 746021987}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: eac4b71ddba9ac84e86c16ad786c9f1f, type: 3}
+  m_VideoClip: {fileID: 32900000, guid: 3ca92de1b1e9f624ea08748bd168bdfd, type: 3}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 0}
@@ -3235,7 +3237,7 @@ VideoPlayer:
   m_TargetMaterialProperty: <noninit>
   m_RenderMode: 2
   m_AspectRatio: 2
-  m_DataSource: 1
+  m_DataSource: 0
   m_TimeUpdateMode: 1
   m_PlaybackSpeed: 1
   m_AudioOutputMode: 2
@@ -3526,6 +3528,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 825135173}
   m_CullTransparentMesh: 1
+--- !u!1 &828577901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 828577903}
+  - component: {fileID: 828577902}
+  m_Layer: 0
+  m_Name: UIVideoPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!328 &828577902
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828577901}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 32900000, guid: 3ca92de1b1e9f624ea08748bd168bdfd, type: 3}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 8400000, guid: c1e0028e4a460d2439b269357de09e0e, type: 2}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: <noninit>
+  m_RenderMode: 2
+  m_AspectRatio: 2
+  m_DataSource: 0
+  m_TimeUpdateMode: 1
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources:
+  - {fileID: 0}
+  m_DirectAudioVolumes:
+  - 1
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 00
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 1
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
+--- !u!4 &828577903
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828577901}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1901.3323, y: 775.8429, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &854981082 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 0b6a1113bf2b252499b84da3ea684253, type: 3}
@@ -11716,11 +11786,23 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 2033337510}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 461490363}
+        m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
+        m_MethodName: OpenAppSetings
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2033337510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12465,6 +12547,7 @@ SceneRoots:
   - {fileID: 1551991070}
   - {fileID: 1629618027}
   - {fileID: 746021989}
+  - {fileID: 828577903}
   - {fileID: 563261371}
   - {fileID: 2129809528}
   - {fileID: 802735350}

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class SelectFolder : MonoBehaviour
 {
 
-    public Button uploadButton;
+    public Button openButton;
     public Button clearButton;
     public TMP_Text folderPath;
     public TMP_Text label;
@@ -24,13 +24,13 @@ public class SelectFolder : MonoBehaviour
     {
         label.text = labelText;
 
-        uploadButton.onClick.AddListener(UploadImage);
+        openButton.onClick.AddListener(OpenFolderSelect);
         clearButton.onClick.AddListener(Clear);
 
         emptyPathPlaceholder = folderPath.text;
     }
 
-    void UploadImage()
+    void OpenFolderSelect()
     {
         StandaloneFileBrowser.OpenFolderPanelAsync("Ordner auswählen", "", multiselect: false, (string[] paths) =>
         {

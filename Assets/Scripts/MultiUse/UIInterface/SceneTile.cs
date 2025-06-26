@@ -1,17 +1,19 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class SceneTile : MonoBehaviour
 {
     Scene scene;
 
     public TMP_Text sceneNameText;
-    public Image image;
+    public RawImage image;
     public bool startScene = false;
     public GameObject icon;
     public Button mainButton;
     public Button editButton;
+    public VideoPlayer videoPlayer;
 
     SceneChanger sceneChanger;
     TextureManager textureManager;
@@ -42,16 +44,34 @@ public class SceneTile : MonoBehaviour
 
         if (!string.IsNullOrEmpty(this.scene.Source))
         {
-            StartCoroutine(textureManager.GetTexture(this.scene.Source, texture =>
+            if (image != null)
             {
-                if (texture != null)
+                if (scene.Type == Scene.MediaType.Photo)
                 {
-                    Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-                    image.sprite = sprite;
+                    StartCoroutine(textureManager.GetTexture(this.scene.Source, texture =>
+                    {
+                        if (texture != null)
+                        {
+                            image.texture = texture;
+                        }
+                    }));
                 }
-            }));
+                else if (scene.Type == Scene.MediaType.Video)
+                {
+                    if (videoPlayer != null)
+                    {
+                        videoPlayer.enabled = true;
+                        videoPlayer.url = this.scene.Source;
+                        var renderTexture = new RenderTexture(1920, 1080, 0);
+                        videoPlayer.targetTexture = renderTexture;
+                        videoPlayer.Play();
+                        image.texture = renderTexture;
+                    }
+                }
+            }
         }
     }
+
 
     void OnClick()
     {

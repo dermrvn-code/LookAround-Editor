@@ -161,8 +161,7 @@ public class SceneChanger : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError("Error while switching to scene " + scene.Name);
-                Debug.LogError(e.Message);
+                Debug.LogError("Error while switching to scene " + scene.Name + ": " + e.Message);
             }
         }
     }

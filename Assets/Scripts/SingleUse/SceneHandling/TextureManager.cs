@@ -107,7 +107,7 @@ public class TextureManager : MonoBehaviour
 
                 if (uwr.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogError("Failed to load texture: " + uwr.error);
+                    Debug.LogError("Failed to load texture from " + filePath + ": " + uwr.error);
                     onLoaded?.Invoke(null);
                 }
                 else

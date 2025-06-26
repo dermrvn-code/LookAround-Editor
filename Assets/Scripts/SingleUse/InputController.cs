@@ -11,7 +11,7 @@ public class InputController : MonoBehaviour
         sc = FindObjectOfType<SceneChanger>();
 
         if (cam == null)
-            Debug.LogError("No eyes were given in the Hardware Emulator");
+            Debug.LogError("No camera was given in the Hardware Emulator");
 
     }
 

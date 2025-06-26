@@ -47,7 +47,6 @@ public class SidebarSettingsManager : MonoBehaviour
     void Select(GameObject target)
     {
         Highlight(target);
-        Debug.Log($"Selected: {target.name}");
         ClearSidebar();
         panelManager.SidebarSetActive(true);
 
@@ -392,7 +391,7 @@ public class SidebarSettingsManager : MonoBehaviour
         var appSettings = Instantiate(prefabDictionary["AppSettings"], sidebarContainer.transform).GetComponent<AppSettings>();
 
         appSettings.Initialize(projectManager.ProjectsPath);
-        
+
         ReloadLayout();
         ProcessIndicator.Hide();
     }
@@ -448,7 +447,6 @@ public class SidebarSettingsManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 GameObject target = hit.collider.gameObject;
-                Debug.Log($"Clicked on: {target.name}");
                 if (target.TryGetComponent(out SceneElementHolder _))
                 {
                     Select(target);
