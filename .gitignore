@@ -79,3 +79,14 @@ crashlytics-build.properties
 /Worlds/*
 /SceneBuilder/*
 /CampusTour_Backup/*
+
+# Exclude common video files
+*.mp4
+*.mov
+*.avi
+*.wmv
+*.flv
+*.mkv
+*.webm
+*.mpeg
+*.mpg
