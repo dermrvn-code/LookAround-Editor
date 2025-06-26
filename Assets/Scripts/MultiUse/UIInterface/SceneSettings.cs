@@ -69,25 +69,28 @@ public class SceneSettings : MonoBehaviour
 
     public void Delete()
     {
-        if (sceneManager.sceneList.TryGetValue(initialName, out Scene scene))
+        Dialog.ShowDialogConfirm("Möchtest du diese Szene wirklich löschen?", () =>
         {
-            sceneManager.sceneList.Remove(initialName);
-            if (scene.IsStartScene)
+            if (sceneManager.sceneList.TryGetValue(initialName, out Scene scene))
             {
-                sceneManager.SetStartScene(sceneNameAvoid: initialName);
-            }
+                sceneManager.sceneList.Remove(initialName);
+                if (scene.IsStartScene)
+                {
+                    sceneManager.SetStartScene(sceneNameAvoid: initialName);
+                }
 
-            if (sceneChanger.currentScene.Name == initialName)
-            {
-                sceneChanger.SwitchSceneAnimation(sceneManager.GetStartScene());
+                if (sceneChanger.currentScene.Name == initialName)
+                {
+                    sceneChanger.SwitchSceneAnimation(sceneManager.GetStartScene());
+                }
+                panelManager.UpdateSceneList();
+                InfoText.ShowInfo("Szene gelöscht.");
             }
-            panelManager.UpdateSceneList();
-            InfoText.ShowInfo("Szene gelöscht.");
-        }
-        else
-        {
-            InfoText.ShowInfo("Szene nicht gefunden.");
-        }
+            else
+            {
+                InfoText.ShowInfo("Szene nicht gefunden.");
+            }
+        });
     }
 
     public static Vector2 MapOffsetToDotted(float x, float y)

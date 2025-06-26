@@ -102,10 +102,13 @@ public class SidebarSettingsManager : MonoBehaviour
         deleteButton.GetComponent<Image>().color = new Color(1f, 0.5f, 0.5f, 1f); // light red
         deleteButton.onClick.AddListener(() =>
         {
-            sceneChanger.currentScene.SceneElements.Remove(holder.sceneElement.id);
-            Destroy(holder.gameObject);
-            Deselect();
-            panelManager.CloseSidebar();
+            Dialog.ShowDialogConfirm("Möchtest du das Element wirklich löschen?", () =>
+            {
+                sceneChanger.currentScene.SceneElements.Remove(holder.sceneElement.id);
+                Destroy(holder.gameObject);
+                Deselect();
+                panelManager.CloseSidebar();
+            });
         });
     }
 
