@@ -1,6 +1,6 @@
 <!-- @format -->
 
-<img src="https://dermrvn-code.github.io/LookAround/assets/logo.png" style="width: 70%;" />
+<img src="https://github.com/user-attachments/assets/1d2eaf66-f73b-4d0b-9ee9-0f5bc1289a86" style="width: 70%;" />
 
 > Explore far places with the digital periscope ✨
 
