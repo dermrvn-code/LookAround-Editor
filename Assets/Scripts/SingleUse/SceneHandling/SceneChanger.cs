@@ -27,6 +27,7 @@ public class SceneChanger : MonoBehaviour
     InteractionHandler ih;
     PanelManager panelManager;
     TextureManager textureManager;
+    LogoLoadingOverlay loadingOverlay;
 
     public Scene currentScene;
 
@@ -36,6 +37,7 @@ public class SceneChanger : MonoBehaviour
         ih = FindObjectOfType<InteractionHandler>();
         textureManager = FindObjectOfType<TextureManager>();
         panelManager = FindObjectOfType<PanelManager>();
+        loadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
 
         // To prevent particles in the editor window
         particlesGameobject.SetActive(true);
@@ -97,17 +99,31 @@ public class SceneChanger : MonoBehaviour
         domeRenderer.material = photoMaterial;
     }
 
-    public void SwitchSceneAnimation(Scene scene, bool closeSidebar = true, bool forceReload = false)
+    public void SwitchSceneAnimation(Scene scene, int index = -1, bool closeSidebar = true, bool forceReload = false)
     {
-        if (scene == null || scene != currentScene || forceReload)
+        if (scene == null || scene != currentScene)
         {
-            TransitionParticles((sceneLoaded) =>
+            if (index == -1)
             {
-                SwitchScene(scene, () =>
-                {
-                    sceneLoaded?.Invoke();
-                }, closeSidebar, forceReload);
-            });
+                TransitionParticles((sceneLoaded) =>
+                            {
+                                SwitchScene(scene, () =>
+                                {
+                                    sceneLoaded?.Invoke();
+                                }, closeSidebar, forceReload);
+                            });
+            }
+            else
+            {
+                TransitionLogo((sceneLoaded) =>
+                    {
+                        SwitchScene(scene, () =>
+                        {
+                            sceneLoaded?.Invoke();
+                        }, closeSidebar, forceReload);
+                    }, logoIndex: index);
+
+            }
         }
     }
 
@@ -339,19 +355,30 @@ public class SceneChanger : MonoBehaviour
     public static string[] actionTypes = { "toScene" };
     public void ActionParser(string action)
     {
-        string pattern = @"toScene\((.*?)\)";
+        string pattern = @"toScene\(([^,]*?)(?:,(\d))*\)";
         Match match = Regex.Match(action, pattern);
         if (match.Success)
         {
-            string sceneName = match.Groups[1].Value; // Extrahiere den Parameter aus der ersten Gruppe
+            string sceneName = match.Groups[1].Value;
+
+            int animationIndex = -1; // -1 = particle, 0,1,2,... = logo index
+            if (match.Groups.Count > 2 && match.Groups[2].Success)
+            {
+                int.TryParse(match.Groups[2].Value.Trim(), out animationIndex);
+            }
 
             Scene scene = sm.sceneList[sceneName];
 
             if (scene != null)
             {
-                SwitchSceneAnimation(scene);
+                SwitchSceneAnimation(scene, animationIndex);
             }
         }
+    }
+
+    public void TransitionLogo(Action<Action> sceneLoaded, int logoIndex)
+    {
+        StartCoroutine(_FadeIn(sceneLoaded, logoIndex));
     }
 
     public void TransitionParticles(Action<Action> sceneLoaded)
@@ -374,5 +401,22 @@ public class SceneChanger : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         particles.Stop();
+    }
+
+    public IEnumerator _FadeIn(Action<Action> sceneLoaded, int logoIndex)
+    {
+        loadingOverlay.SetLogoFromIndex(logoIndex);
+        loadingOverlay.FadeIn();
+        yield return new WaitForSeconds(2f);
+        sceneLoaded.Invoke(() =>
+        {
+            StartCoroutine(_FadeOut());
+        });
+    }
+
+    private IEnumerator _FadeOut()
+    {
+        yield return new WaitForSeconds(0.5f);
+        loadingOverlay.FadeOut();
     }
 }

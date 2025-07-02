@@ -13,6 +13,7 @@ public class SceneManager : MonoBehaviour
     TextureManager textureManager;
 
     XDocument sceneOverview;
+    LogoLoadingOverlay lolo;
 
     public Dictionary<string, Scene> sceneList = new Dictionary<string, Scene>();
 
@@ -20,6 +21,7 @@ public class SceneManager : MonoBehaviour
     {
         sc = FindObjectOfType<SceneChanger>();
         textureManager = FindObjectOfType<TextureManager>();
+        lolo = FindObjectOfType<LogoLoadingOverlay>();
 
         sc.ToMainScene();
     }
@@ -68,6 +70,32 @@ public class SceneManager : MonoBehaviour
                 }
 
                 counter++;
+            }
+
+
+            var logoList = sceneOverview.Root.Element("Logos");
+            if (logoList != null)
+            {
+                var logos = logoList.Descendants("Logo");
+                foreach (var logo in logos)
+                {
+                    string logoSource = logo.Attribute("source").Value;
+                    string id_str = logo.Attribute("id").Value;
+                    string backgroundColor = logo.Attribute("backgroundColor")?.Value ?? "";
+
+                    if (int.TryParse(id_str, out int id))
+                    {
+                        string logoPath = Path.Combine(Path.GetDirectoryName(sceneOverviewPath), logoSource);
+                        if (File.Exists(logoPath))
+                        {
+                            lolo.LoadLogo(id, logoPath, backgroundColor);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("Logo file does not exist: " + logoPath);
+                        }
+                    }
+                }
             }
         }
         catch (Exception e)
