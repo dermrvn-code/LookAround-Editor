@@ -1,6 +1,6 @@
 <!-- @format -->
 
-<img src="https://dermrvn-code.github.io/LookAround/assets/logo.png" style="width: 70%;" />
+<img src="https://github.com/user-attachments/assets/1d2eaf66-f73b-4d0b-9ee9-0f5bc1289a86" style="width: 70%;" />
 
 > Explore far places with the digital periscope ✨
 
@@ -16,7 +16,7 @@ The project spans across three repositories:
 For a more detailed overview of the project, please visit [the project page](https://dermrvn-code.github.io/LookAround/)
 
 This repository is the software part of the project.
-It covers the Unity project that is used inside the periscope to display any 360 videos, photos or streams.
+It covers an Unity build Editor that is used to create and design scenes from any 360 videos or photos.
 
 For an in-depth documentation of the software, please visit the [software documentation](https://dermrvn-code.github.io/LookAround/software) page.
 
@@ -28,7 +28,7 @@ The project is built in Version 2022.3.21f1 but should work with any version of 
 To open the project, simply clone the repository and open the project over the Unity Hub.
 Downloading it as a ZIP and then opening could cause issues with the project, as some images and other files are stored using Git LFS.
 
-Alternatively you can download the build from the [releases page](/releases).
+Alternatively you can download the build from the [releases page](../../releases).
 
 ## 📜 License
 
