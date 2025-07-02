@@ -130,7 +130,7 @@ public class WorldBundleManager : MonoBehaviour
 
         bundleDoc.Add(worlds);
         bundleDoc.Save(bundlePath);
-        // ProcessIndicator.Hide();
+        ProcessIndicator.Hide();
 
         Dialog.ShowDialogOkay("Bundle erfolgreich erstellt!", () =>
         {
