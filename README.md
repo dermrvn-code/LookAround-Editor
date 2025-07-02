@@ -28,7 +28,7 @@ The project is built in Version 2022.3.21f1 but should work with any version of 
 To open the project, simply clone the repository and open the project over the Unity Hub.
 Downloading it as a ZIP and then opening could cause issues with the project, as some images and other files are stored using Git LFS.
 
-Alternatively you can download the build from the [releases page](../releases).
+Alternatively you can download the build from the [releases page](../../releases).
 
 ## 📜 License
 
