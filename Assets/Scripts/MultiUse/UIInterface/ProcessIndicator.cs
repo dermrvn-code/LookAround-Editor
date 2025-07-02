@@ -14,18 +14,28 @@ public class ProcessIndicator : MonoBehaviour
         instance = this;
     }
 
+    void _Show()
+    {
+        background.enabled = true;
+        loader.SetActive(true);
+    }
+
+    void _Hide()
+    {
+        background.enabled = false;
+        loader.SetActive(false);
+    }
+
     public static void Show()
     {
         if (instance == null) return;
-        instance.background.enabled = true;
-        instance.loader.SetActive(true);
+        instance._Show();
     }
 
     public static void Hide()
     {
         if (instance == null) return;
-        instance.background.enabled = false;
-        instance.loader.SetActive(false);
+        instance._Hide();
     }
 
 }

@@ -10,7 +10,8 @@ public class PanelManager : MonoBehaviour
     public enum ViewType
     {
         Graph,
-        Scene
+        Scene,
+        Bundler
     }
 
     public ViewType currentViewType = ViewType.Scene;
@@ -20,6 +21,8 @@ public class PanelManager : MonoBehaviour
     public GameObject sideBar;
 
     public GameObject graphPanel;
+
+    public GameObject bundlerPanel;
 
     public GameObject dome;
 
@@ -35,7 +38,7 @@ public class PanelManager : MonoBehaviour
     Vector2 sideBarAnchorMin;
 
     RectTransform sideBarRectTransform;
-
+    Animator sideBarAnimator;
     void Start()
     {
         graphManager = graphPanel.GetComponent<GraphManager>();
@@ -45,13 +48,14 @@ public class PanelManager : MonoBehaviour
 
         sideBarRectTransform = sideBar.GetComponent<RectTransform>();
         sideBarAnchorMin = sideBar.GetComponent<RectTransform>().anchorMin;
+        sideBarAnimator = sideBar.GetComponent<Animator>();
 
         DomeSetActive(true);
         TopBarSetActive(true);
         BottomBarSetActive(true);
         GraphSetActive(false);
         SidebarSetActive(false);
-
+        BundlerSetActive(false);
     }
 
     public void TopBarSetActive(bool isActive)
@@ -93,6 +97,14 @@ public class PanelManager : MonoBehaviour
             {
                 image.enabled = isActive;
             }
+        }
+    }
+
+    void BundlerSetActive(bool isActive)
+    {
+        if (bundlerPanel != null)
+        {
+            bundlerPanel.SetActive(isActive);
         }
     }
 
@@ -151,7 +163,11 @@ public class PanelManager : MonoBehaviour
 
         if (sideBar != null)
         {
-            sideBar.GetComponent<Animator>().SetBool("visible", isActive);
+            if (sideBarAnimator == null)
+            {
+                sideBarAnimator = sideBar.GetComponent<Animator>();
+            }
+            sideBarAnimator.SetBool("visible", isActive);
             if (!sideBar.activeSelf)
             {
                 sideBar.SetActive(isActive);
@@ -178,6 +194,7 @@ public class PanelManager : MonoBehaviour
         SidebarSetActive(false);
         DomeSetActive(false);
         GraphSetActive(true);
+        BundlerSetActive(false);
     }
 
     public void SwitchToScene()
@@ -187,7 +204,20 @@ public class PanelManager : MonoBehaviour
         SidebarSetActive(false);
         DomeSetActive(true);
         GraphSetActive(false);
+        BundlerSetActive(false);
     }
+
+    public void SwitchToBundler()
+    {
+        currentViewType = ViewType.Bundler;
+        BottomBarSetActive(false);
+        SidebarSetActive(false);
+        DomeSetActive(false);
+        GraphSetActive(false);
+        BundlerSetActive(true);
+    }
+
+
 
     public void ToggleGraphPanel()
     {
