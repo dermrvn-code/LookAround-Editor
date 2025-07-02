@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class SidebarSettingsManager : MonoBehaviour
@@ -22,6 +23,9 @@ public class SidebarSettingsManager : MonoBehaviour
     SceneManager sceneManager;
     ProjectManager projectManager;
 
+
+    public bool notAutomaticSave = false;
+
     void Start()
     {
         panelManager = FindObjectOfType<PanelManager>();
@@ -38,37 +42,53 @@ public class SidebarSettingsManager : MonoBehaviour
             spriteDictionary[pair.value] = pair.sprite;
     }
 
-    void ClearSidebar()
+    public void ClearSidebar(UnityAction onCleared)
     {
+        if (notAutomaticSave)
+        {
+            Dialog.ShowDialogConfirm("Möchtest du das wirklich schließen?", () =>
+            {
+                notAutomaticSave = false;
+                foreach (Transform child in sidebarContainer.transform)
+                    Destroy(child.gameObject);
+
+                onCleared?.Invoke();
+            });
+            return;
+        }
         foreach (Transform child in sidebarContainer.transform)
             Destroy(child.gameObject);
+        onCleared?.Invoke();
     }
 
     void Select(GameObject target)
     {
         Highlight(target);
-        ClearSidebar();
-        panelManager.SidebarSetActive(true);
+        ClearSidebar(() =>
+        {
+            notAutomaticSave = false;
+            panelManager.SidebarSetActive(true);
 
-        if (target.TryGetComponent(out DomePosition domePosition))
-            AddDomePosition(domePosition);
+            if (target.TryGetComponent(out DomePosition domePosition))
+                AddDomePosition(domePosition);
 
-        if (target.TryGetComponent(out Interactable interactable))
-            AddOnAction(interactable);
+            if (target.TryGetComponent(out Interactable interactable))
+                AddOnAction(interactable);
 
-        if (target.TryGetComponent(out InteractableArrow arrow))
-            AddArrow(arrow);
+            if (target.TryGetComponent(out InteractableArrow arrow))
+                AddArrow(arrow);
 
-        if (target.TryGetComponent(out TextBox textbox))
-            AddTextbox(textbox);
+            if (target.TryGetComponent(out TextBox textbox))
+                AddTextbox(textbox);
 
-        if (target.TryGetComponent(out TMP_Text text))
-            AddText(text);
+            if (target.TryGetComponent(out TMP_Text text))
+                AddText(text);
 
-        if (target.TryGetComponent(out SceneElementHolder holder)) // always true, as functions checks target for SceneElementHolder
-            AddDeleteElement(holder);                              // maybe add other check later, it needed, for now every element can be deleted
+            if (target.TryGetComponent(out SceneElementHolder holder)) // always true, as functions checks target for SceneElementHolder
+                AddDeleteElement(holder);                              // maybe add other check later, it needed, for now every element can be deleted
 
-        ReloadLayout();
+            ReloadLayout();
+        });
     }
 
     void ReloadLayout()
@@ -342,61 +362,69 @@ public class SidebarSettingsManager : MonoBehaviour
 
     public void OpenSceneSettings(string sceneName)
     {
+        notAutomaticSave = true;
         ProcessIndicator.Show();
         panelManager.SwitchToScene();
-        panelManager.SidebarSetActive(false);
-        ClearSidebar();
-        panelManager.SidebarSetActive(true);
-
-        var sceneSettings = Instantiate(prefabDictionary["SceneSettings"], sidebarContainer.transform).GetComponent<SceneSettings>();
-
-        if (sceneManager.sceneList.ContainsKey(sceneName))
+        ClearSidebar(() =>
         {
-            var scene = sceneManager.sceneList[sceneName];
-            Vector2 offset = SceneSettings.MapOffsetToDegree(scene.XOffset, scene.YOffset);
+            panelManager.SidebarSetActive(true);
 
-            sceneSettings.Initialize(sceneName, scene.IsStartScene, scene.Source, (int)offset.x, (int)offset.y);
-        }
-        ReloadLayout();
-        ProcessIndicator.Hide();
+            var sceneSettings = Instantiate(prefabDictionary["SceneSettings"], sidebarContainer.transform).GetComponent<SceneSettings>();
+
+            if (sceneManager.sceneList.ContainsKey(sceneName))
+            {
+                var scene = sceneManager.sceneList[sceneName];
+                Vector2 offset = SceneSettings.MapOffsetToDegree(scene.XOffset, scene.YOffset);
+
+                sceneSettings.Initialize(sceneName, scene.IsStartScene, scene.Source, (int)offset.x, (int)offset.y);
+            }
+            ReloadLayout();
+            ProcessIndicator.Hide();
+        });
     }
 
     public void OpenWorldSettings(bool newWorld = false)
     {
         ProcessIndicator.Show();
         panelManager.SwitchToScene();
-        panelManager.SidebarSetActive(false);
-        ClearSidebar();
-        panelManager.SidebarSetActive(true);
-
-        var worldSettings = Instantiate(prefabDictionary["WorldSettings"], sidebarContainer.transform).GetComponent<WorldSettings>();
-        worldSettings.newWorld = newWorld;
-
-        if (!newWorld)
+        ClearSidebar(() =>
         {
-            worldSettings.InitializeWorldSettings(
-                projectManager.currentProjectName,
-                projectManager.currentAuthorName,
-                projectManager.currentProjectDescription
-            );
-        }
-        ReloadLayout();
-        ProcessIndicator.Hide();
+            notAutomaticSave = true;
+            panelManager.SidebarSetActive(true);
+
+            var worldSettings = Instantiate(prefabDictionary["WorldSettings"], sidebarContainer.transform).GetComponent<WorldSettings>();
+            worldSettings.newWorld = newWorld;
+
+            if (!newWorld)
+            {
+                worldSettings.InitializeWorldSettings(
+                    projectManager.currentProjectName,
+                    projectManager.currentAuthorName,
+                    projectManager.currentProjectDescription,
+                    newWorld,
+                    projectManager.logoPaths
+                );
+            }
+            ReloadLayout();
+            ProcessIndicator.Hide();
+        });
     }
 
     public void OpenAppSettings()
     {
         ProcessIndicator.Show();
-        panelManager.SidebarSetActive(false);
-        ClearSidebar();
-        panelManager.SidebarSetActive(true);
+        ClearSidebar(() =>
+        {
+            notAutomaticSave = true;
+            panelManager.SidebarSetActive(true);
 
-        var appSettings = Instantiate(prefabDictionary["AppSettings"], sidebarContainer.transform).GetComponent<AppSettings>();
+            var appSettings = Instantiate(prefabDictionary["AppSettings"], sidebarContainer.transform).GetComponent<AppSettings>();
 
-        appSettings.Initialize(projectManager.ProjectsPath);
+            appSettings.Initialize(projectManager.ProjectsPath);
 
-        ReloadLayout();
-        ProcessIndicator.Hide();
+            ReloadLayout();
+            ProcessIndicator.Hide();
+        });
     }
 
     string[] funnySceneNames = new string[]
@@ -428,14 +456,16 @@ public class SidebarSettingsManager : MonoBehaviour
 
         ProcessIndicator.Show();
         panelManager.SwitchToScene();
-        panelManager.SidebarSetActive(false);
-        ClearSidebar();
-        panelManager.SidebarSetActive(true);
+        ClearSidebar(() =>
+        {
+            notAutomaticSave = true;
+            panelManager.SidebarSetActive(true);
 
-        var sceneSettings = Instantiate(prefabDictionary["SceneSettings"], sidebarContainer.transform).GetComponent<SceneSettings>();
-        string sceneName = funnySceneNames[Random.Range(0, funnySceneNames.Length)];
-        sceneSettings.Initialize(sceneName, sceneManager.sceneList.Count == 0, "");
-        ProcessIndicator.Hide();
+            var sceneSettings = Instantiate(prefabDictionary["SceneSettings"], sidebarContainer.transform).GetComponent<SceneSettings>();
+            string sceneName = funnySceneNames[Random.Range(0, funnySceneNames.Length)];
+            sceneSettings.Initialize(sceneName, sceneManager.sceneList.Count == 0, "");
+            ProcessIndicator.Hide();
+        });
     }
 
     void Update()

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using SFB;
 using TMPro;
 using UnityEngine;
@@ -8,9 +9,16 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
+public enum MediaType
+{
+    Image,
+    Video,
+    ImageVideo
+}
+
 public class MediaUploader : MonoBehaviour
 {
-
+    public MediaType mediaType = MediaType.ImageVideo;
     public Button uploadButton;
     public Button clearButton;
     public RawImage displayMedia;
@@ -48,8 +56,25 @@ public class MediaUploader : MonoBehaviour
 
     void UploadMedia()
     {
-        var extensions = new[] { new ExtensionFilter("Bilder und Videos", "jpg", "png", "jpeg", "mp4", "mov") };
-        StandaloneFileBrowser.OpenFilePanelAsync("Medium hochladen", "", extensions, false, (string[] paths) =>
+        string name = "Medium hochladen";
+        List<string> filterExtensions = new List<string>();
+        if (mediaType == MediaType.Image || mediaType == MediaType.ImageVideo)
+        {
+            filterExtensions.AddRange(new[] { "jpg", "png", "jpeg" });
+            name = "Bild";
+        }
+        if (mediaType == MediaType.Video || mediaType == MediaType.ImageVideo)
+        {
+            filterExtensions.AddRange(new[] { "mp4", "mov" });
+            name = "Video";
+        }
+        if (mediaType == MediaType.ImageVideo)
+        {
+            name = "Bild oder Video";
+        }
+
+        var extensions = new[] { new ExtensionFilter(name, filterExtensions.ToArray()) };
+        StandaloneFileBrowser.OpenFilePanelAsync(name + " hochladen", "", extensions, false, (string[] paths) =>
         {
             if (paths.Length == 1)
             {
@@ -150,7 +175,6 @@ public class MediaUploader : MonoBehaviour
         }
         return null;
     }
-
 
 
     public void Initialize(string path, string label = "")

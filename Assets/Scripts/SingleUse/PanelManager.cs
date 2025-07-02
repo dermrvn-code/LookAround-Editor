@@ -184,7 +184,11 @@ public class PanelManager : MonoBehaviour
 
     public void CloseSidebar()
     {
-        SidebarSetActive(false);
+        sidebarSettingsManager.ClearSidebar(() =>
+        {
+            SidebarSetActive(false);
+            sidebarSettingsManager.notAutomaticSave = false;
+        });
     }
 
     public void SwitchToGraphPanel()

@@ -30,6 +30,8 @@ public class ProjectManager : MonoBehaviour
     private SceneChanger sceneChanger;
     private PanelManager panelManager;
 
+    public string[] logoPaths = new string[3];
+
     void Awake()
     {
         UpdateProjectsFolder();
@@ -81,9 +83,20 @@ public class ProjectManager : MonoBehaviour
         return Regex.Replace(str, @"[^\w ]", "").Trim();
     }
 
-    public void UpdateWorld(string name, string author, string description, bool newWorld = false)
+    public void UpdateWorld(string name, string author, string description, bool newWorld = false, string[] paths = null)
     {
         string initialProjectName = currentProjectName;
+
+        if (paths != null)
+        {
+            for (int i = 0; i < logoPaths.Length; i++)
+            {
+                if (paths != null && paths.Length > i)
+                {
+                    logoPaths[i] = paths[i];
+                }
+            }
+        }
 
         string cleanName = CleanUpString(name);
         string cleanAuthor = CleanUpString(author);
