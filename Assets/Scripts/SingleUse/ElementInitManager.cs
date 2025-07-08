@@ -141,7 +141,7 @@ public class ElementInitManager : MonoBehaviour
 
     void AddSceneElement(SceneElement sceneElement)
     {
-        if (sceneChanger.currentScene == null)
+        if (sceneChanger.currentScene.Name == "" && sceneChanger.currentScene.Source == "")
         {
             Debug.LogError("Current scene is null, cannot add scene element.");
             return;
@@ -149,7 +149,7 @@ public class ElementInitManager : MonoBehaviour
 
         var elements = sceneChanger.currentScene.SceneElements;
         int maxKey = 0;
-        if (elements.Count > 0)
+        if (elements != null && elements.Count > 0)
         {
             maxKey = Mathf.Max(elements.Keys.ToArray());
         }

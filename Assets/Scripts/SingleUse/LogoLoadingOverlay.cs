@@ -22,8 +22,9 @@ public class LogoLoadingOverlay : MonoBehaviour
     Color backgroundColor;
     Color logoColor;
 
-    Texture2D[] logoTextures = new Texture2D[3];
-    Color[] logoColors = new Color[3]
+    public string[] logoPaths = new string[3];
+    public Texture2D[] logoTextures = new Texture2D[3];
+    public Color[] logoColors = new Color[3]
     {
         new Color(1f, 1f, 1f, 1f),
         new Color(1f, 1f, 1f, 1f),
@@ -58,6 +59,11 @@ public class LogoLoadingOverlay : MonoBehaviour
 
     public void SetLogo(Texture2D newLogo)
     {
+        if (newLogo == null)
+        {
+            return;
+        }
+
         logo = newLogo;
         logoMaterial.mainTexture = logo;
 
@@ -78,8 +84,10 @@ public class LogoLoadingOverlay : MonoBehaviour
 
     IEnumerator _LoadLogo(int id, string path, string color)
     {
-        if (id < logoTextures.Length)
+
+        if (id >= 0 && id < logoTextures.Length)
         {
+            logoPaths[id] = path;
             using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture("file://" + path))
             {
                 yield return uwr.SendWebRequest();

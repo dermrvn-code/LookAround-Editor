@@ -54,13 +54,20 @@ public class GraphManager : MonoBehaviour
             {
                 if (!string.IsNullOrEmpty(element.action))
                 {
-                    string pattern = @"toScene\((.*?)\)";
+                    string pattern = @"toScene\(([^,]*?)(?:,(\d))*\)";
                     Match match = Regex.Match(element.action, pattern);
                     if (match.Success)
                     {
-                        string sceneName = match.Groups[1].Value; // Extrahiere den Parameter aus der ersten Grupp
+                        string sceneName = match.Groups[1].Value;
+
+                        int animationIndex = -1; // -1 = particle, 0,1,2,... = logo index
+                        if (match.Groups.Count > 2 && match.Groups[2].Success)
+                        {
+                            int.TryParse(match.Groups[2].Value.Trim(), out animationIndex);
+                        }
 
                         sceneConnections.Add(new string[] { scene.Name, sceneName });
+
                     }
                 }
             }

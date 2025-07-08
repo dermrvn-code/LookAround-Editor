@@ -41,7 +41,7 @@ public class UIDropZone : MonoBehaviour
 
     private void HandleItemDropped(UIDragItem droppedItem)
     {
-        if (sceneChanger.currentScene == null)
+        if (sceneChanger.currentScene.Name == "" && sceneChanger.currentScene.Source == "")
         {
             InfoText.ShowInfo("Elemente können nur in validen Szenen platziert werden.");
             return;

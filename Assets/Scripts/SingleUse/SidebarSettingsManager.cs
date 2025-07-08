@@ -22,6 +22,7 @@ public class SidebarSettingsManager : MonoBehaviour
     SceneChanger sceneChanger;
     SceneManager sceneManager;
     ProjectManager projectManager;
+    LogoLoadingOverlay logoLoadingOverlay;
 
 
     public bool notAutomaticSave = false;
@@ -32,6 +33,7 @@ public class SidebarSettingsManager : MonoBehaviour
         sceneChanger = FindObjectOfType<SceneChanger>();
         sceneManager = FindObjectOfType<SceneManager>();
         projectManager = FindObjectOfType<ProjectManager>();
+        logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
 
         prefabDictionary = new Dictionary<string, GameObject>();
         foreach (var pair in prefabs)
@@ -299,48 +301,156 @@ public class SidebarSettingsManager : MonoBehaviour
         var sceneElement = interactable.GetComponent<SceneElementHolder>()?.sceneElement;
         string action = sceneElement?.action ?? "";
 
-        var match = Regex.Match(action, @"toScene\((.*?)\)");
+        string pattern = @"toScene\(([^,]*?)(?:,(-?\d))*\)";
+        Match match = Regex.Match(action, pattern);
         if (match.Success)
         {
             string sceneName = match.Groups[1].Value;
 
-            var group = Instantiate(prefabDictionary["Group"], sidebarContainer.transform);
-            var label = group.GetComponentInChildren<TMP_Text>();
-            var elementsContainer = group.transform.Find("Elements");
-            label.text = "Interaktion";
-
-            var dropdown = Instantiate(prefabDictionary["Dropdown"], elementsContainer).GetComponent<DropdownInput>();
-            var actionOptions = new List<string> { "Keine" };
-            foreach (var scene in sceneManager.sceneList.Values)
+            int animationIndex = -1; // -1 = particle, 0,1,2,... = logo index
+            if (match.Groups.Count > 2 && match.Groups[2].Success)
             {
-                if (scene.Name != sceneChanger.currentScene.Name)
+                int.TryParse(match.Groups[2].Value.Trim(), out animationIndex);
+            }
+
+            ActionToScene(interactable, sceneElement, sceneName, animationIndex);
+        }
+    }
+
+    public void ActionToScene(Interactable interactable, SceneElement sceneElement, string sceneName, int animationIndex)
+    {
+        var group = Instantiate(prefabDictionary["Group"], sidebarContainer.transform);
+        var label = group.GetComponentInChildren<TMP_Text>();
+        var elementsContainer = group.transform.Find("Elements");
+        label.text = "Interaktion";
+
+        var dropdown = Instantiate(prefabDictionary["Dropdown"], elementsContainer).GetComponent<DropdownInput>();
+        var actionOptions = new List<string> { "Keine" };
+        foreach (var scene in sceneManager.sceneList.Values)
+        {
+            if (scene.Name != sceneChanger.currentScene.Name)
+            {
+                actionOptions.Add(scene.Name);
+            }
+        }
+        dropdown.Initialize(actionOptions, sceneName, "Gehe zu");
+
+        var spriteSelector = Instantiate(prefabDictionary["SpriteSelector"], elementsContainer).GetComponent<SpriteSelector>();
+
+
+        Sprite[] logos = new Sprite[3];
+        for (int i = 0; i < logoLoadingOverlay.logoTextures.Length; i++)
+        {
+            var logo = logoLoadingOverlay.logoTextures[i];
+            if (logo != null)
+            {
+                logos[i] = Sprite.Create(logo, new Rect(0, 0, logo.width, logo.height), new Vector2(0.5f, 0.5f));
+            }
+        }
+
+        var spritePairs = new Pairs.SpritePair[4];
+        spritePairs[0] = new Pairs.SpritePair { value = "-1", sprite = spriteDictionary["smoke"] };
+        for (int i = 1; i < spritePairs.Length; i++)
+        {
+            var logo = logos[i - 1];
+            if (logo != null)
+            {
+                spritePairs[i] = new Pairs.SpritePair { value = (i - 1).ToString(), sprite = logo };
+            }
+        }
+
+        string selectedValue = animationIndex.ToString();
+        if (animationIndex >= 1 && animationIndex < spritePairs.Length)
+        {
+            selectedValue = animationIndex.ToString();
+        }
+        spriteSelector.Initialize(spritePairs, selectedValue, "Übergang");
+
+        var button = Instantiate(prefabDictionary["Button"], elementsContainer).GetComponent<Button>();
+        button.GetComponentInChildren<TMP_Text>().text = "Aktion ausführen";
+
+        dropdown.OnValueChanged.AddListener(value =>
+        {
+            UpdateToScene(sceneElement, interactable, dropdown, spriteSelector);
+        });
+
+        spriteSelector.OnElementSelected.AddListener(value =>
+        {
+            UpdateToScene(sceneElement, interactable, dropdown, spriteSelector);
+        });
+
+        button.onClick.AddListener(() => interactable.OnInteract.Invoke());
+    }
+
+    void UpdateToScene(SceneElement sceneElement, Interactable interactable, DropdownInput sceneInput, SpriteSelector animIndexInput)
+    {
+        if (sceneElement != null)
+        {
+            string newAction = "";
+            if (sceneInput.value.ToLower() != "keine" && !string.IsNullOrEmpty(sceneInput.value.ToLower()))
+            {
+                newAction = UpdateAction(sceneElement.action, "toScene", new string[] { sceneInput.value, animIndexInput.value });
+            }
+            sceneElement.action = newAction;
+            UpdateSceneElement(sceneElement);
+        }
+
+        interactable.OnInteract.RemoveAllListeners();
+        if (sceneInput.value.ToLower() != "keine" && !string.IsNullOrEmpty(sceneInput.value.ToLower()))
+        {
+            interactable.OnInteract.AddListener(() =>
+                sceneChanger.ActionParser(sceneElement.action)
+            );
+        }
+    }
+
+    public string UpdateAction(string action, string function = "", string[] parameters = null)
+    {
+        string newFunctionName = function;
+        string[] newParameters = parameters ?? new string[0];
+
+        string pattern = @"([a-zA-Z_]+)\((?:(?:(?:([^,()]*),)*)|(?:(?:([^,()]*),)*([^,()]){1}))\)";
+        Match match = Regex.Match(action, pattern);
+
+        if (match.Success)
+        {
+            // Extract old function and params
+            string functionName = match.Groups[1].Value;
+
+            List<string> extractedParams = new List<string>();
+            for (int i = 0; i < match.Groups.Count - 2; i++)
+            {
+                var paramMatch = match.Groups[i + 2];
+                if (paramMatch.Success && !string.IsNullOrEmpty(paramMatch.Value))
                 {
-                    actionOptions.Add(scene.Name);
+                    string value = paramMatch.Value.Trim();
+                    extractedParams.Add(value);
                 }
             }
-            dropdown.Initialize(actionOptions, sceneName, "Gehe zu");
 
-            var button = Instantiate(prefabDictionary["Button"], elementsContainer).GetComponent<Button>();
-            button.GetComponentInChildren<TMP_Text>().text = "Aktion ausführen";
-
-            dropdown.OnValueChanged.AddListener(value =>
+            // Override with with new values
+            if (!string.IsNullOrEmpty(functionName))
             {
-                interactable.OnInteract.RemoveAllListeners();
-                if (value != "Keine")
-                {
-                    interactable.OnInteract.AddListener(() =>
-                        sceneChanger.ActionParser(sceneElement.action)
-                    );
-                }
-                if (sceneElement != null)
-                {
-                    sceneElement.action = value == "Keine" ? "" : $"toScene({value})";
-                    UpdateSceneElement(sceneElement);
-                }
-            });
+                newFunctionName = functionName;
+            }
 
-            button.onClick.AddListener(() => interactable.OnInteract.Invoke());
+
+            for (int i = 0; i < newParameters.Length; i++)
+            {
+                if (newParameters[i] == "" && i < extractedParams.Count)
+                {
+                    newParameters[i] = extractedParams[i].Trim();
+                }
+            }
+
+
         }
+        if (newFunctionName == "")
+        {
+            return "";
+        }
+        return $"{newFunctionName}({string.Join(",", newParameters)})";
+
     }
 
     public void UpdateSceneElement(SceneElement sceneElement)
@@ -402,7 +512,7 @@ public class SidebarSettingsManager : MonoBehaviour
                     projectManager.currentAuthorName,
                     projectManager.currentProjectDescription,
                     newWorld,
-                    projectManager.logoPaths
+                    logoLoadingOverlay.logoPaths
                 );
             }
             ReloadLayout();

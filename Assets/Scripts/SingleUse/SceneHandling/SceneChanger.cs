@@ -355,7 +355,7 @@ public class SceneChanger : MonoBehaviour
     public static string[] actionTypes = { "toScene" };
     public void ActionParser(string action)
     {
-        string pattern = @"toScene\(([^,]*?)(?:,(\d))*\)";
+        string pattern = @"toScene\(([^,]*?)(?:,(-?\d))*\)";
         Match match = Regex.Match(action, pattern);
         if (match.Success)
         {

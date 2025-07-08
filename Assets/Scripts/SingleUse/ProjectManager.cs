@@ -26,11 +26,10 @@ public class ProjectManager : MonoBehaviour
     public TMP_Text projectNameText;
     public TMP_Text sceneNameText;
 
-    private SceneManager sceneManager;
-    private SceneChanger sceneChanger;
-    private PanelManager panelManager;
-
-    public string[] logoPaths = new string[3];
+    SceneManager sceneManager;
+    SceneChanger sceneChanger;
+    PanelManager panelManager;
+    LogoLoadingOverlay logoLoadingOverlay;
 
     void Awake()
     {
@@ -42,6 +41,7 @@ public class ProjectManager : MonoBehaviour
         sceneManager = FindObjectOfType<SceneManager>();
         sceneChanger = FindObjectOfType<SceneChanger>();
         panelManager = FindObjectOfType<PanelManager>();
+        logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
     }
 
     public bool IsInProject()
@@ -89,11 +89,12 @@ public class ProjectManager : MonoBehaviour
 
         if (paths != null)
         {
-            for (int i = 0; i < logoPaths.Length; i++)
+            for (int i = 0; i < logoLoadingOverlay.logoPaths.Length; i++)
             {
                 if (paths != null && paths.Length > i)
                 {
-                    logoPaths[i] = paths[i];
+                    logoLoadingOverlay.logoPaths[i] = paths[i];
+                    logoLoadingOverlay.LoadLogo(i, paths[i]);
                 }
             }
         }
@@ -174,6 +175,8 @@ public class ProjectManager : MonoBehaviour
             sceneChanger.ToStartScene();
             panelManager.SwitchToScene();
             isInProject = true;
+
+
         });
         if (!success)
         {
@@ -219,6 +222,8 @@ public class ProjectManager : MonoBehaviour
         currentFolderPath = "";
         unsavedChanges = false;
         isInProject = false;
+
+        logoLoadingOverlay.logoPaths = new string[3];
 
         if (projectNameText != null)
         {

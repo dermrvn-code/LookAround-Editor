@@ -22,10 +22,12 @@ public class WorldSaver : MonoBehaviour
 
     SceneManager sceneManager;
     ProjectManager projectManager;
+    LogoLoadingOverlay logoLoadingOverlay;
     void Start()
     {
         sceneManager = GetComponent<SceneManager>();
         projectManager = FindObjectOfType<ProjectManager>();
+        logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
     }
 
     public void Save()
@@ -51,6 +53,7 @@ public class WorldSaver : MonoBehaviour
             Directory.CreateDirectory(projectManager.currentFolderPath);
         }
 
+        // SAVE SCENES
         bool changedScene = false;
         foreach (var scene in sceneManager.sceneList.Values)
         {
@@ -62,13 +65,28 @@ public class WorldSaver : MonoBehaviour
         }
         bool wasDeleted = DeleteUnusedScenes();
 
-        SaveSceneOverview(sceneManager.sceneList.Values.ToList());
-        if (wasDeleted || changedScene)
+        // COPY OVER LOGOS
+        bool logoUpdated = false;
+        for (int i = 0; i < logoLoadingOverlay.logoPaths.Length; i++)
         {
+            string logoPath = logoLoadingOverlay.logoPaths[i];
+            if (string.IsNullOrEmpty(logoPath) || logoLoadingOverlay.logoTextures[i] == null)
+            {
+                continue;
+            }
+            CopyMedium(logoPath, projectManager.currentFolderPath, $"logo_{i}");
+            logoUpdated = true;
+        }
+
+
+        SaveSceneOverview(sceneManager.sceneList.Values.ToList());
+        if (!wasDeleted && !changedScene && !logoUpdated)
+        {
+            InfoText.ShowInfo("Keine Änderungen vorhanden");
         }
         else
         {
-            InfoText.ShowInfo("Keine Änderungen vorhanden");
+            InfoText.ShowInfo("Projekt gespeichert in " + projectManager.currentFolderPath);
         }
     }
 
@@ -123,10 +141,10 @@ public class WorldSaver : MonoBehaviour
         return deleted;
     }
 
-    string CopyMedium(string source, string destinationFolder, string scenename)
+    string CopyMedium(string source, string destinationFolder, string filename)
     {
         string extension = Path.GetExtension(source);
-        string destFile = scenename + extension;
+        string destFile = filename + extension;
 
         string destinationPath = Path.Combine(destinationFolder, destFile);
 
@@ -188,14 +206,18 @@ public class WorldSaver : MonoBehaviour
     XDocument ParseSceneOverview(List<Scene> scenes)
     {
         XDocument doc = new XDocument();
+
+        // HEADER
         XElement root = new XElement("World");
         root.SetAttributeValue("name", projectManager.currentProjectName);
         root.SetAttributeValue("author", projectManager.currentAuthorName);
 
+        // DESCRIPTION
         XElement description = new XElement("Description");
         description.Add(projectManager.currentProjectDescription);
         root.Add(description);
 
+        // SCENES
         XElement scenesContainer = new XElement("Scenes");
         foreach (var scene in scenes)
         {
@@ -212,6 +234,30 @@ public class WorldSaver : MonoBehaviour
         }
         root.Add(scenesContainer);
 
+        // LOGOS
+        if (logoLoadingOverlay.logoPaths.Length > 0)
+        {
+            XElement logosElement = new XElement("Logos");
+
+            for (int i = 0; i < logoLoadingOverlay.logoPaths.Length; i++)
+            {
+                if (string.IsNullOrEmpty(logoLoadingOverlay.logoPaths[i]))
+                {
+                    continue;
+                }
+                XElement logoElement = new XElement("Logo");
+                logoElement.SetAttributeValue("id", i);
+                logoElement.SetAttributeValue("source", Path.Combine("logo_" + i + Path.GetExtension(logoLoadingOverlay.logoPaths[i])));
+                logosElement.Add(logoElement);
+            }
+            if (logosElement.HasElements)
+            {
+                root.Add(logosElement);
+            }
+        }
+
+
+        // METADATA
         XElement metaData = new XElement("MetaData");
         metaData.SetAttributeValue("amountOfScenes", scenes.Count.ToString());
         metaData.SetAttributeValue("editorVersion", Application.version);

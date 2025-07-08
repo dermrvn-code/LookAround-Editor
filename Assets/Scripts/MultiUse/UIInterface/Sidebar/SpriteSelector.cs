@@ -32,8 +32,18 @@ public class SpriteSelector : MonoBehaviour
         }
         elementsList = _elementsList;
 
+        if (elementsList == null || elementsList.Length == 0)
+        {
+            Debug.LogWarning("No elements provided for SpriteSelector.");
+            return;
+        }
+
         for (int i = 0; i < elementsList.Length; i++)
         {
+            if (elementsList[i] == null)
+            {
+                continue;
+            }
             string value = elementsList[i].value;
             GameObject newItem = Instantiate(item, elements.transform);
             newItem.name = value;
