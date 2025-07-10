@@ -44,7 +44,7 @@ public class SceneSettings : MonoBehaviour
         {
             if (!string.IsNullOrEmpty(value))
             {
-                if (CheckIfLiveUpdatable()) sceneChanger.UpateMedium(value);
+                if (CheckIfLiveUpdatable()) sceneChanger.UpdateMedium(value);
             }
         });
     }

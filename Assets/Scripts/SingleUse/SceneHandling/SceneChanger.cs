@@ -27,6 +27,7 @@ public class SceneChanger : MonoBehaviour
     InteractionHandler ih;
     PanelManager panelManager;
     TextureManager textureManager;
+    ModelManager modelManager;
     LogoLoadingOverlay loadingOverlay;
 
     public Scene currentScene;
@@ -38,6 +39,7 @@ public class SceneChanger : MonoBehaviour
         textureManager = FindObjectOfType<TextureManager>();
         panelManager = FindObjectOfType<PanelManager>();
         loadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
+        modelManager = FindObjectOfType<ModelManager>();
 
         // To prevent particles in the editor window
         particlesGameobject.SetActive(true);
@@ -204,7 +206,7 @@ public class SceneChanger : MonoBehaviour
         }
     }
 
-    public void UpateMedium(string path)
+    public void UpdateMedium(string path)
     {
         if (currentScene == null) return;
 
@@ -241,29 +243,34 @@ public class SceneChanger : MonoBehaviour
 
     public void LoadSceneElements(Dictionary<int, SceneElement> sceneElementsDict)
     {
+        modelManager.HideAllModels();
         ClearSceneElements();
         List<SceneElement> sceneElements = new List<SceneElement>(sceneElementsDict.Values);
 
         foreach (var sceneElement in sceneElements)
         {
-            if (sceneElement.type == SceneElement.ElementType.Text)
+            if (sceneElement is SceneElementText)
             {
-                LoadTextElement(sceneElement);
+                LoadTextElement((SceneElementText)sceneElement);
             }
-            else if (sceneElement.type == SceneElement.ElementType.Textbox)
+            else if (sceneElement is SceneElementTextbox)
             {
-                LoadTextboxElement(sceneElement);
+                LoadTextboxElement((SceneElementTextbox)sceneElement);
             }
-            else if (sceneElement.type == SceneElement.ElementType.DirectionArrow)
+            else if (sceneElement is SceneElementArrow)
             {
-                LoadDirectionArrow(sceneElement);
+                LoadArrow((SceneElementArrow)sceneElement);
+            }
+            else if (sceneElement is SceneElementModel)
+            {
+                LoadModel((SceneElementModel)sceneElement);
             }
         }
     }
 
     [SerializeField]
     TMP_Text textPrefab;
-    public void LoadTextElement(SceneElement sceneElement)
+    public void LoadTextElement(SceneElementText sceneElement)
     {
         var text = Instantiate(textPrefab, sceneElementsContainer.transform);
         text.name = sceneElement.text;
@@ -284,7 +291,7 @@ public class SceneChanger : MonoBehaviour
     GameObject textboxPrefab;
     public Sprite info, warning, question, play;
 
-    public void LoadTextboxElement(SceneElement sceneElement)
+    public void LoadTextboxElement(SceneElementTextbox sceneElement)
     {
         var text = Instantiate(textboxPrefab, sceneElementsContainer.transform);
         var textbox = text.GetComponentInChildren<TextBox>();
@@ -328,7 +335,7 @@ public class SceneChanger : MonoBehaviour
 
     [SerializeField]
     GameObject arrowPrefab;
-    public void LoadDirectionArrow(SceneElement sceneElement)
+    public void LoadArrow(SceneElementArrow sceneElement)
     {
         var arrow = Instantiate(arrowPrefab, sceneElementsContainer.transform);
 
@@ -338,6 +345,7 @@ public class SceneChanger : MonoBehaviour
         dp.position.x = sceneElement.x;
         dp.position.y = sceneElement.y;
         dp.distance = sceneElement.distance;
+        dp.xRotOffset = sceneElement.xRotationOffset;
 
         InteractableArrow interactableArrow = arrow.GetComponent<InteractableArrow>();
         interactableArrow.OnInteract.AddListener(() =>
@@ -351,6 +359,24 @@ public class SceneChanger : MonoBehaviour
         arrow.AddComponent<SceneElementHolder>().sceneElement = sceneElement;
 
     }
+
+    public void LoadModel(SceneElementModel sceneElement)
+    {
+        DomePosition dp = modelManager.DisplayModel(sceneElement.modelName);
+        dp.position.x = sceneElement.x;
+        dp.position.y = sceneElement.y;
+        dp.distance = sceneElement.distance;
+        dp.xRotOffset = sceneElement.xRotationOffset;
+
+
+        InteractableModel interactableModel = dp.GetComponent<InteractableModel>();
+        interactableModel.OnInteract.AddListener(() =>
+        {
+            ActionParser(sceneElement.action);
+        });
+    }
+
+
 
     public static string[] actionTypes = { "toScene" };
     public void ActionParser(string action)

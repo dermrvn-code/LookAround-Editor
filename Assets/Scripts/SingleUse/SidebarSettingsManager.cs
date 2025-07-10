@@ -147,7 +147,7 @@ public class SidebarSettingsManager : MonoBehaviour
         var colorPicker = Instantiate(prefabDictionary["ColorPicker"], elementsContainer).GetComponent<ColorPicker>();
         colorPicker.Initialize(arrow.color, "Hauptfarbe");
 
-        var sceneElement = arrow.GetComponent<SceneElementHolder>()?.sceneElement;
+        SceneElementArrow sceneElement = (SceneElementArrow)arrow.GetComponent<SceneElementHolder>()?.sceneElement;
 
         rotationInput.OnValueChanged.AddListener(value =>
         {
@@ -177,7 +177,7 @@ public class SidebarSettingsManager : MonoBehaviour
         var elementsContainer = group.transform.Find("Elements");
         label.text = "Textbox Einstellungen";
 
-        var sceneElement = textbox.GetComponent<SceneElementHolder>()?.sceneElement;
+        SceneElementTextbox sceneElement = (SceneElementTextbox)textbox.GetComponent<SceneElementHolder>()?.sceneElement;
 
         var spriteSelector = Instantiate(prefabDictionary["SpriteSelector"], elementsContainer).GetComponent<SpriteSelector>();
         var spritePairs = new List<Pairs.SpritePair>();
@@ -249,7 +249,7 @@ public class SidebarSettingsManager : MonoBehaviour
         var colorPicker = Instantiate(prefabDictionary["ColorPicker"], elementsContainer).GetComponent<ColorPicker>();
         colorPicker.Initialize(text.color, "Farbe");
 
-        var sceneElement = text.GetComponent<SceneElementHolder>()?.sceneElement;
+        SceneElementText sceneElement = (SceneElementText)text.GetComponent<SceneElementHolder>()?.sceneElement;
 
         textInput.OnValueChanged.AddListener(newText =>
         {
@@ -299,6 +299,7 @@ public class SidebarSettingsManager : MonoBehaviour
     public void AddOnAction(Interactable interactable)
     {
         var sceneElement = interactable.GetComponent<SceneElementHolder>()?.sceneElement;
+
         string action = sceneElement?.action ?? "";
 
         string pattern = @"toScene\(([^,]*?)(?:,(-?\d))*\)";

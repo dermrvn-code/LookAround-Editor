@@ -15,7 +15,7 @@ public class TextureManager : MonoBehaviour
     int currentMemoryUsage = 0;
 
 
-    public IEnumerator LoadAllTextures(List<string> texturePaths, Loader loadingBar, Action onComplete = null)
+    public IEnumerator LoadAllTextures(List<string> texturePaths, Action<string> onProgress, Action onComplete = null)
     {
         textureCache.Clear();
         lruList.Clear();
@@ -34,8 +34,7 @@ public class TextureManager : MonoBehaviour
             {
                 max = maxTexturesToKeep;
             }
-            string fileName = Path.GetFileName(texturePath);
-            loadingBar.UpdateLoader((float)i / (max - 1), "Textur \"" + fileName + "\" wird geladen...");
+            onProgress?.Invoke(texturePath);
 
             yield return StartCoroutine(LoadTextureWithEviction(texturePath, null));
         }

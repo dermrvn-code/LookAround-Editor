@@ -62,17 +62,14 @@ public class ElementInitManager : MonoBehaviour
 
         var holder = text.gameObject.AddComponent<SceneElementHolder>();
 
-        SceneElement sceneElement = new SceneElement
-        {
-            type = SceneElement.ElementType.Text,
-            x = (int)position,
-            y = 0,
-            distance = 8,
-            rotation = 0,
-            color = $"#{ColorUtility.ToHtmlStringRGBA(color)}",
-            action = "toScene()",
-            text = text.text
-        };
+        SceneElement sceneElement = new SceneElementText
+        (
+            text: text.text,
+            x: (int)position,
+            y: 0,
+            distance: 8,
+            action: "toScene()"
+        );
 
         AddSceneElement(sceneElement);
         holder.sceneElement = sceneElement;
@@ -92,16 +89,15 @@ public class ElementInitManager : MonoBehaviour
 
         var holder = arrow.gameObject.AddComponent<SceneElementHolder>();
 
-        SceneElement sceneElement = new SceneElement
-        {
-            type = SceneElement.ElementType.DirectionArrow,
-            x = (int)position,
-            y = 0,
-            distance = 8,
-            rotation = 180,
-            color = $"#{ColorUtility.ToHtmlStringRGBA(color)}",
-            action = "toScene()"
-        };
+        SceneElement sceneElement = new SceneElementArrow
+        (
+            x: (int)position,
+            y: 0,
+            distance: 8,
+            rotation: 180,
+            color: $"#{ColorUtility.ToHtmlStringRGBA(color)}",
+            action: "toScene()"
+        );
 
         AddSceneElement(sceneElement);
         holder.sceneElement = sceneElement;
@@ -123,17 +119,15 @@ public class ElementInitManager : MonoBehaviour
 
         var holder = textbox.gameObject.AddComponent<SceneElementHolder>();
 
-        SceneElement sceneElement = new SceneElement
-        {
-            type = SceneElement.ElementType.Textbox,
-            x = (int)position,
-            y = 0,
-            distance = 8,
-            rotation = 0,
-            color = $"#{ColorUtility.ToHtmlStringRGBA(color)}",
-            icon = "info",
-            text = text
-        };
+        SceneElement sceneElement = new SceneElementTextbox
+        (
+            text: text,
+            icon: "info",
+            x: (int)position,
+            y: 0,
+            distance: 8,
+            color: $"#{ColorUtility.ToHtmlStringRGBA(color)}"
+        );
 
         AddSceneElement(sceneElement);
         holder.sceneElement = sceneElement;

@@ -52,10 +52,13 @@ public class GraphManager : MonoBehaviour
         {
             foreach (var element in scene.SceneElements.Values)
             {
-                if (!string.IsNullOrEmpty(element.action))
+                if (element.GetType().GetProperty("action") != null)
+                // if (!string.IsNullOrEmpty(element.action))
                 {
+                    var actionValue = element.GetType().GetProperty("action").GetValue(element);
+
                     string pattern = @"toScene\(([^,]*?)(?:,(\d))*\)";
-                    Match match = Regex.Match(element.action, pattern);
+                    Match match = Regex.Match(actionValue.ToString(), pattern);
                     if (match.Success)
                     {
                         string sceneName = match.Groups[1].Value;

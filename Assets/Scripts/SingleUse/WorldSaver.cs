@@ -329,28 +329,34 @@ public class WorldSaver : MonoBehaviour
             XElement elementNode = new XElement("Element");
             elementNode.SetAttributeValue("x", element.x.ToString());
             elementNode.SetAttributeValue("y", element.y.ToString());
-            elementNode.SetAttributeValue("type", element.type.ToString());
 
-            switch (element.type)
+            if (element is SceneElementArrow)
             {
-                case SceneElement.ElementType.DirectionArrow:
-                    elementNode.SetAttributeValue("distance", element.distance.ToString());
-                    elementNode.SetAttributeValue("rotation", element.rotation.ToString());
-                    elementNode.SetAttributeValue("action", element.action);
-                    elementNode.SetAttributeValue("color", element.color);
-                    break;
+                elementNode.SetAttributeValue("type", "directionarrow");
 
-                case SceneElement.ElementType.Textbox:
-                    elementNode.SetAttributeValue("distance", element.distance.ToString());
-                    elementNode.SetAttributeValue("icon", element.icon);
-                    elementNode.Add(element.text);
-                    break;
+                SceneElementArrow arrow = (SceneElementArrow)element;
+                elementNode.SetAttributeValue("distance", arrow.distance.ToString());
+                elementNode.SetAttributeValue("rotation", arrow.rotation.ToString());
+                elementNode.SetAttributeValue("action", arrow.action);
+                elementNode.SetAttributeValue("color", arrow.color);
+            }
+            else if (element is SceneElementTextbox)
+            {
+                elementNode.SetAttributeValue("type", "textbox");
 
-                case SceneElement.ElementType.Text:
-                    elementNode.SetAttributeValue("distance", element.distance.ToString());
-                    elementNode.SetAttributeValue("action", element.action);
-                    elementNode.Add(element.text);
-                    break;
+                SceneElementTextbox textbox = (SceneElementTextbox)element;
+                elementNode.SetAttributeValue("distance", textbox.distance.ToString());
+                elementNode.SetAttributeValue("icon", textbox.icon);
+                elementNode.Add(textbox.text);
+            }
+            else if (element is SceneElementText)
+            {
+                elementNode.SetAttributeValue("type", "text");
+
+                SceneElementText text = (SceneElementText)element;
+                elementNode.SetAttributeValue("distance", text.distance.ToString());
+                elementNode.SetAttributeValue("action", text.action);
+                elementNode.Add(text.text);
             }
 
             sceneElement.Add(elementNode);

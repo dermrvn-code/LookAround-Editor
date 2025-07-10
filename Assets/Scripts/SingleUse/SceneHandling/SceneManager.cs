@@ -14,6 +14,7 @@ public class SceneManager : MonoBehaviour
 
     XDocument sceneOverview;
     LogoLoadingOverlay lolo;
+    ModelManager modelManager;
 
     public Dictionary<string, Scene> sceneList = new Dictionary<string, Scene>();
 
@@ -21,16 +22,21 @@ public class SceneManager : MonoBehaviour
     {
         sc = FindObjectOfType<SceneChanger>();
         textureManager = FindObjectOfType<TextureManager>();
+        modelManager = FindObjectOfType<ModelManager>();
         lolo = FindObjectOfType<LogoLoadingOverlay>();
 
         sc.ToMainScene();
     }
 
     List<string> texturePaths = new List<string>();
+    Dictionary<string, string> modelPaths = new Dictionary<string, string>();
     public bool LoadSceneOverview(string sceneOverviewPath, Loader loadingBar, Action onComplete)
     {
         texturePaths.Clear();
         textureManager.ReleaseAllTextures();
+
+        modelPaths = new Dictionary<string, string>();
+        modelManager.UnloadAllModels();
 
         sceneList.Clear();
         if (!File.Exists(sceneOverviewPath)) Debug.LogWarning("The scene overview file does not exist: " + sceneOverviewPath);
@@ -38,65 +44,7 @@ public class SceneManager : MonoBehaviour
 
         try
         {
-            var scenesList = sceneOverview.Root.Element("Scenes");
-            var scenes = scenesList.Descendants("Scene");
-
-            int counter = 0;
-            foreach (var scene in scenes)
-            {
-                string scenePath = scene.Attribute("path").Value;
-                string sceneName = scene.Attribute("name").Value;
-
-                var startScene = scene.Attribute("startScene");
-                bool isStartScene = false;
-                if (startScene != null)
-                {
-                    if (startScene.Value.ToLower() == "true") isStartScene = true;
-                }
-
-                string sceneFolder = Path.GetDirectoryName(sceneOverviewPath);
-                Scene s = LoadScene(sceneName, sceneFolder, scenePath, isStartScene);
-
-                if (s.Type == Scene.MediaType.Photo)
-                {
-                    if (s.IsStartScene)
-                    {
-                        texturePaths.Insert(0, s.Source);
-                    }
-                    else
-                    {
-                        texturePaths.Add(s.Source);
-                    }
-                }
-
-                counter++;
-            }
-
-
-            var logoList = sceneOverview.Root.Element("Logos");
-            if (logoList != null)
-            {
-                var logos = logoList.Descendants("Logo");
-                foreach (var logo in logos)
-                {
-                    string logoSource = logo.Attribute("source").Value;
-                    string id_str = logo.Attribute("id").Value;
-                    string backgroundColor = logo.Attribute("backgroundColor")?.Value ?? "";
-
-                    if (int.TryParse(id_str, out int id))
-                    {
-                        string logoPath = Path.Combine(Path.GetDirectoryName(sceneOverviewPath), logoSource);
-                        if (File.Exists(logoPath))
-                        {
-                            lolo.LoadLogo(id, logoPath, backgroundColor);
-                        }
-                        else
-                        {
-                            Debug.LogWarning("Logo file does not exist: " + logoPath);
-                        }
-                    }
-                }
-            }
+            LoadScenes(sceneOverviewPath);
         }
         catch (Exception e)
         {
@@ -104,12 +52,124 @@ public class SceneManager : MonoBehaviour
             return false;
         }
 
-        StartCoroutine(textureManager.LoadAllTextures(texturePaths, loadingBar, () =>
+        LoadLogos(sceneOverviewPath);
+        LoadModels(sceneOverviewPath);
+
+        int maxLoadingSteps = texturePaths.Count + modelPaths.Count;
+
+        loadingBar.OnFull(() =>
+        {
+            onComplete?.Invoke();
+        });
+
+        StartCoroutine(textureManager.LoadAllTextures(texturePaths,
+        (texturePath) => // onProgress
+        {
+            loadingBar.IncreaseLoader(maxLoadingSteps, "Lädt Textur: " + Path.GetFileName(texturePath));
+        }, () => // onComplete
         {
             Debug.Log("Textures preloaded!");
             onComplete?.Invoke();
         }));
+
+        foreach (var model in modelPaths)
+        {
+            string modelName = model.Key;
+            string modelPath = model.Value;
+
+            modelManager.LoadModel(modelPath, modelName, () =>
+            {
+                loadingBar.IncreaseLoader(maxLoadingSteps, "Lädt Model: " + Path.GetFileName(modelPath));
+            });
+        }
         return true;
+    }
+
+    void LoadScenes(string sceneOverviewPath)
+    {
+        var scenesList = sceneOverview.Root.Element("Scenes");
+        var scenes = scenesList.Descendants("Scene");
+
+        int counter = 0;
+        foreach (var scene in scenes)
+        {
+            string scenePath = scene.Attribute("path").Value;
+            string sceneName = scene.Attribute("name").Value;
+
+            var startScene = scene.Attribute("startScene");
+            bool isStartScene = false;
+            if (startScene != null)
+            {
+                if (startScene.Value.ToLower() == "true") isStartScene = true;
+            }
+
+            string sceneFolder = Path.GetDirectoryName(sceneOverviewPath);
+            Scene s = LoadScene(sceneName, sceneFolder, scenePath, isStartScene);
+
+            if (s.Type == Scene.MediaType.Photo)
+            {
+                if (s.IsStartScene)
+                {
+                    texturePaths.Insert(0, s.Source);
+                }
+                else
+                {
+                    texturePaths.Add(s.Source);
+                }
+            }
+
+            counter++;
+        }
+    }
+
+    void LoadLogos(string sceneOverviewPath)
+    {
+        var logoList = sceneOverview.Root.Element("Logos");
+        if (logoList != null)
+        {
+            var logos = logoList.Descendants("Logo");
+            foreach (var logo in logos)
+            {
+                string logoSource = logo.Attribute("source").Value;
+                string id_str = logo.Attribute("id").Value;
+                string backgroundColor = logo.Attribute("backgroundColor")?.Value ?? "";
+
+                if (int.TryParse(id_str, out int id))
+                {
+                    string logoPath = Path.Combine(Path.GetDirectoryName(sceneOverviewPath), logoSource);
+                    if (File.Exists(logoPath))
+                    {
+                        lolo.LoadLogo(id, logoPath, backgroundColor);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Logo file does not exist: " + logoPath);
+                    }
+                }
+            }
+        }
+    }
+    void LoadModels(string scenesOverviewPath)
+    {
+        var modelsList = sceneOverview.Root.Element("Models");
+        if (modelsList != null)
+        {
+            var models = modelsList.Descendants("Model");
+            foreach (var model in models)
+            {
+                string modelSource = model.Attribute("source").Value;
+                string modelName = model.Attribute("name").Value;
+
+                string modelPath = Path.Combine(Path.GetDirectoryName(scenesOverviewPath), modelSource);
+
+                if (File.Exists(modelPath))
+                {
+                    modelPaths.Add(modelName, modelPath);
+                    return;
+                }
+                Debug.LogWarning("Model file does not exist: " + modelPath);
+            }
+        }
     }
 
     Scene LoadScene(string sceneName, string mainFolder, string scenePath, bool isStartScene)
@@ -171,22 +231,23 @@ public class SceneManager : MonoBehaviour
             if (elementType == "text")
             {
                 string action = element.Attribute("action").Value;
-                se = new SceneElement(
-                        SceneElement.ElementType.Text,
-                        text, x, y,
-                        distance, xRotationOffset,
-                        action: action
-                    );
+                se = new SceneElementText(
+                    text: text,
+                    x: x, y: y,
+                    distance: distance,
+                    xRotationOffset: xRotationOffset,
+                    action: action
+                );
             }
             else if (elementType == "textbox")
             {
                 string icon = element.Attribute("icon").Value;
-                se = new SceneElement(
-                        SceneElement.ElementType.Textbox,
-                        text, x, y,
-                        distance, xRotationOffset,
-                        icon: icon
-                    );
+                se = new SceneElementTextbox(
+                    text: text, icon: icon,
+                    x: x, y: y,
+                    distance: distance,
+                    xRotationOffset: xRotationOffset
+                );
             }
             else if (elementType == "directionarrow")
             {
@@ -199,13 +260,27 @@ public class SceneManager : MonoBehaviour
                     color = element.Attribute("color").Value;
                 }
 
-                se = new SceneElement(
-                        SceneElement.ElementType.DirectionArrow,
-                        text, x, y,
-                        distance, xRotationOffset,
-                        action: action, rotation: rotation, color: color
-                    );
+                se = new SceneElementArrow(
+                    x: x, y: y,
+                    distance: distance,
+                    xRotationOffset: xRotationOffset,
+                    rotation: rotation,
+                    color: color, action: action
+                );
 
+            }
+            else if (elementType == "model")
+            {
+                string name = element.Attribute("name").Value;
+                string action = element.Attribute("action").Value;
+
+                se = new SceneElementModel(
+                    modelName: name,
+                    x: x, y: y,
+                    distance: distance,
+                    xRotationOffset: xRotationOffset,
+                    action: action
+                );
             }
             else
             {
@@ -221,7 +296,6 @@ public class SceneManager : MonoBehaviour
         }
         Scene sceneObj = new Scene(type == "video" ? Scene.MediaType.Video : Scene.MediaType.Photo, sceneName, source, sceneElements, isStartScene, xOffset, yOffset);
 
-        Debug.Log("Scene loaded" + sceneName);
         sceneList.Add(sceneName, sceneObj);
         return sceneObj;
     }

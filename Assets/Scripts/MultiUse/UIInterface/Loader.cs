@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -8,14 +9,49 @@ public class Loader : MonoBehaviour
     public GameObject bar;
     public TMP_Text loadingText;
 
-    public void UpdateLoader(float progress, string text = "")
+    Action onFull = null;
+
+    int maxSteps = 0;
+    int currentStep = 0;
+
+    public void IncreaseLoader(int maxSteps, string text = "", int stepSize = 1)
     {
+        currentStep += stepSize;
+
+        if (currentStep > maxSteps)
+        {
+            currentStep = maxSteps;
+        }
+
+        UpdateLoader(currentStep, maxSteps, text);
+    }
+
+    public void UpdateLoader(int currentStep, int maxSteps, string text = "")
+    {
+        this.maxSteps = maxSteps;
+        this.currentStep = currentStep;
+
         RectTransform rt = bar.GetComponent<RectTransform>();
-        rt.anchorMax = new Vector2(progress, rt.anchorMax.y);
+        rt.anchorMax = new Vector2((float)currentStep / maxSteps, rt.anchorMax.y);
 
         if (!string.IsNullOrEmpty(text))
         {
             loadingText.text = text;
         }
+
+        if (currentStep + 1 >= maxSteps)
+        {
+            onFull?.Invoke();
+        }
+    }
+
+    public void OnFull(Action onFull)
+    {
+        onFull = () =>
+        {
+            onFull?.Invoke();
+            onFull = null;
+            currentStep = 0;
+        };
     }
 }
