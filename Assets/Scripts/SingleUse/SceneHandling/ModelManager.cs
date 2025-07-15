@@ -13,8 +13,8 @@ public class ModelManager : MonoBehaviour
     int maxModels = 3;
 
     [SerializeField]
-    Dictionary<string, GameObject> loadedModels = new Dictionary<string, GameObject>();
-    Dictionary<string, GameObject> previewModels = new Dictionary<string, GameObject>();
+    public Dictionary<string, GameObject> loadedModels = new Dictionary<string, GameObject>();
+    public Dictionary<string, GameObject> previewModels = new Dictionary<string, GameObject>();
 
     Dictionary<string, RenderTexture> textures = new Dictionary<string, RenderTexture>();
     Dictionary<string, string> modelPaths = new Dictionary<string, string>();
@@ -47,7 +47,6 @@ public class ModelManager : MonoBehaviour
     public string GetModelPath(string modelName)
     {
         string path = modelPaths[modelName];
-        Debug.Log($"{modelName}: {path}");
 
         if (string.IsNullOrEmpty(path))
         {
@@ -167,15 +166,20 @@ public class ModelManager : MonoBehaviour
             newModelName = modelName;
         }
 
+        if (loadedModels.ContainsKey(newModelName))
+        {
+            UnloadModel(newModelName);
+        }
+
         if (!previewModels.ContainsKey(modelName))
         {
-            Debug.LogWarning("No preview model to store.");
+            Debug.LogWarning($"No preview model with name {modelName} to store.");
             return;
         }
 
-        if (loadedModels.ContainsKey(modelName))
+        if (loadedModels.Count >= maxModels)
         {
-            Debug.LogWarning("Model already exists with this name: " + modelName);
+            Debug.LogWarning("Maximum number of models loaded. Cannot store more.");
             return;
         }
 

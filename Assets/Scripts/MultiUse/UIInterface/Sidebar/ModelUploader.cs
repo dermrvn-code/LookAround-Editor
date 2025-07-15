@@ -33,7 +33,6 @@ public class ModelUploader : MonoBehaviour
 
     void Awake()
     {
-        modelName = $"model_preview_{Random.Range(0, 1000)}";
         modelManager = FindObjectOfType<ModelManager>();
 
         animator.SetBool("Open", false);

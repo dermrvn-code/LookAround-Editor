@@ -9,43 +9,71 @@ public class MediaSettings : MonoBehaviour
 {
 
     public MediaUploader[] logos = new MediaUploader[3];
+    public MediaUploader[] sprites = new MediaUploader[3];
     public ModelUploader[] models = new ModelUploader[3];
 
 
     ProjectManager projectManager;
     ModelManager modelManager;
+    SpriteManager spriteManager;
     void Start()
     {
         projectManager = FindObjectOfType<ProjectManager>();
         modelManager = FindObjectOfType<ModelManager>();
+        spriteManager = FindObjectOfType<SpriteManager>();
     }
 
     public void Save()
     {
-        List<string> logoPaths = new List<string>();
-        foreach (var logo in logos)
+        for (int i = 0; i < logos.Length; i++)
         {
-            if (!string.IsNullOrEmpty(logo.value))
+            var logoInput = logos[i];
+            if (string.IsNullOrEmpty(logoInput.value))
             {
-                if (!File.Exists(logo.value))
-                {
-                    InfoText.ShowInfo($"Logo-Datei '{logo.value}' existiert nicht.");
-                    continue;
-                }
-                logoPaths.Add(logo.value);
+                continue;
             }
+            spriteManager.LoadLogo(i, logoInput.value);
         }
 
-        // projectManager.UpdateWorld(worldName, worldAuthor, worldDescription, newWorld, logoPaths.ToArray());
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            var spriteInput = sprites[i];
+            if (string.IsNullOrEmpty(spriteInput.value))
+            {
+                continue;
+            }
+            spriteManager.LoadSprite(i, spriteInput.value);
+        }
+
+        for (int i = 0; i < models.Length; i++)
+        {
+            var modelInput = models[i];
+            if (string.IsNullOrEmpty(modelInput.modelName))
+            {
+                continue;
+            }
+
+            modelManager.StorePreviewModel(modelInput.modelName);
+        }
+
+        InfoText.ShowInfo("Medien wurden gespeichert.");
     }
 
-    public void Initialize(string[] logoPaths = null, string[] modelNames = null)
+    public void Initialize(string[] logoPaths = null, string[] spritePaths = null, string[] modelNames = null)
     {
         if (logoPaths != null)
         {
             for (int i = 0; i < logos.Length && i < logoPaths.Length; i++)
             {
                 logos[i].Initialize(logoPaths[i]);
+            }
+        }
+
+        if (spritePaths != null)
+        {
+            for (int i = 0; i < logos.Length && i < sprites.Length; i++)
+            {
+                sprites[i].Initialize(spritePaths[i]);
             }
         }
 

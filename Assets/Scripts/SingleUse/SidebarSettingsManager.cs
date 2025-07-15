@@ -23,7 +23,7 @@ public class SidebarSettingsManager : MonoBehaviour
     SceneManager sceneManager;
     ProjectManager projectManager;
     ModelManager modelManager;
-    LogoLoadingOverlay logoLoadingOverlay;
+    SpriteManager spriteManager;
 
 
     public bool notAutomaticSave = false;
@@ -35,7 +35,7 @@ public class SidebarSettingsManager : MonoBehaviour
         sceneManager = FindObjectOfType<SceneManager>();
         projectManager = FindObjectOfType<ProjectManager>();
         modelManager = FindObjectOfType<ModelManager>();
-        logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
+        spriteManager = FindObjectOfType<SpriteManager>();
 
         prefabDictionary = new Dictionary<string, GameObject>();
         foreach (var pair in prefabs)
@@ -342,9 +342,9 @@ public class SidebarSettingsManager : MonoBehaviour
 
 
         Sprite[] logos = new Sprite[3];
-        for (int i = 0; i < logoLoadingOverlay.logoTextures.Length; i++)
+        for (int i = 0; i < spriteManager.logos.Length; i++)
         {
-            var logo = logoLoadingOverlay.logoTextures[i];
+            var logo = spriteManager.logos[i].spriteData.texture;
             if (logo != null)
             {
                 logos[i] = Sprite.Create(logo, new Rect(0, 0, logo.width, logo.height), new Vector2(0.5f, 0.5f));
@@ -548,10 +548,11 @@ public class SidebarSettingsManager : MonoBehaviour
             notAutomaticSave = true;
             panelManager.SidebarSetActive(true);
 
-            var worldSettings = Instantiate(prefabDictionary["MediaSettings"], sidebarContainer.transform).GetComponent<MediaSettings>();
+            var mediaSettings = Instantiate(prefabDictionary["MediaSettings"], sidebarContainer.transform).GetComponent<MediaSettings>();
 
-            worldSettings.Initialize(
-                logoLoadingOverlay.logoPaths,
+            mediaSettings.Initialize(
+                spriteManager.GetLogoPaths(),
+                spriteManager.GetSpritePaths(),
                 modelManager.GetModelNames()
             );
 

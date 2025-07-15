@@ -13,7 +13,7 @@ public class SceneManager : MonoBehaviour
     TextureManager textureManager;
 
     XDocument sceneOverview;
-    LogoLoadingOverlay lolo;
+    SpriteManager spriteManager;
     ModelManager modelManager;
 
     public Dictionary<string, Scene> sceneList = new Dictionary<string, Scene>();
@@ -23,12 +23,13 @@ public class SceneManager : MonoBehaviour
         sc = FindObjectOfType<SceneChanger>();
         textureManager = FindObjectOfType<TextureManager>();
         modelManager = FindObjectOfType<ModelManager>();
-        lolo = FindObjectOfType<LogoLoadingOverlay>();
+        spriteManager = FindObjectOfType<SpriteManager>();
 
         sc.ToMainScene();
     }
 
     List<string> texturePaths = new List<string>();
+    Dictionary<int, string> spritePaths = new Dictionary<int, string>();
     Dictionary<string, string> modelPaths = new Dictionary<string, string>();
     public bool LoadSceneOverview(string sceneOverviewPath, Loader loadingBar, Action onComplete)
     {
@@ -54,8 +55,9 @@ public class SceneManager : MonoBehaviour
 
         LoadLogos(sceneOverviewPath);
         LoadModels(sceneOverviewPath);
+        LoadSprites(sceneOverviewPath);
 
-        int maxLoadingSteps = texturePaths.Count + modelPaths.Count;
+        int maxLoadingSteps = texturePaths.Count + modelPaths.Count + spritePaths.Count;
 
         loadingBar.OnFull(() =>
         {
@@ -71,6 +73,13 @@ public class SceneManager : MonoBehaviour
             Debug.Log("Textures preloaded!");
             onComplete?.Invoke();
         }));
+
+        foreach (var spritePath in spritePaths)
+        {
+            spriteManager.LoadSprite(spritePath.Key, spritePath.Value);
+            loadingBar.IncreaseLoader(maxLoadingSteps, "Lädt Sprite: " + Path.GetFileName(spritePath.Value));
+            Debug.Log($"Loaded sprite: {spritePath.Value}");
+        }
 
         foreach (var model in modelPaths)
         {
@@ -146,7 +155,7 @@ public class SceneManager : MonoBehaviour
                     string logoPath = Path.Combine(Path.GetDirectoryName(sceneOverviewPath), logoSource);
                     if (File.Exists(logoPath))
                     {
-                        lolo.LoadLogo(id, logoPath, backgroundColor);
+                        spriteManager.LoadLogo(id, logoPath, backgroundColor);
                     }
                     else
                     {
@@ -156,6 +165,31 @@ public class SceneManager : MonoBehaviour
             }
         }
     }
+
+    void LoadSprites(string scenesOverviewPath)
+    {
+        var spritesList = sceneOverview.Root.Element("Sprites");
+        if (spritesList != null)
+        {
+            var sprites = spritesList.Descendants("Sprite");
+            foreach (var sprite in sprites)
+            {
+                string spriteSource = sprite.Attribute("source").Value;
+                int index = int.Parse(sprite.Attribute("id").Value);
+
+                string spritePath = Path.Combine(Path.GetDirectoryName(scenesOverviewPath), spriteSource);
+                if (File.Exists(spritePath))
+                {
+                    spritePaths.Add(index, spritePath); ;
+                }
+                else
+                {
+                    Debug.LogWarning("Sprite file does not exist: " + spritePath);
+                }
+            }
+        }
+    }
+
     void LoadModels(string scenesOverviewPath)
     {
         var modelsList = sceneOverview.Root.Element("Models");

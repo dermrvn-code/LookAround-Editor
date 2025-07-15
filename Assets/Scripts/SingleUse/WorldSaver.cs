@@ -23,13 +23,13 @@ public class WorldSaver : MonoBehaviour
     SceneManager sceneManager;
     ProjectManager projectManager;
     ModelManager modelManager;
-    LogoLoadingOverlay logoLoadingOverlay;
+    SpriteManager spriteManager;
     void Start()
     {
         sceneManager = GetComponent<SceneManager>();
         projectManager = FindObjectOfType<ProjectManager>();
         modelManager = FindObjectOfType<ModelManager>();
-        logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
+        spriteManager = FindObjectOfType<SpriteManager>();
     }
 
     public void Save()
@@ -75,22 +75,35 @@ public class WorldSaver : MonoBehaviour
 
         // COPY OVER LOGOS
         bool logoUpdated = false;
-        for (int i = 0; i < logoLoadingOverlay.logoPaths.Length; i++)
+        for (int i = 0; i < spriteManager.logos.Length; i++)
         {
-            string logoPath = logoLoadingOverlay.logoPaths[i];
-            if (string.IsNullOrEmpty(logoPath) || logoLoadingOverlay.logoTextures[i] == null)
+            var logo = spriteManager.logos[i];
+
+            if (string.IsNullOrEmpty(logo.spriteData.path) || logo.spriteData.texture == null)
             {
                 continue;
             }
-            CopyMedium(logoPath, Path.Combine(mediaFolder, "logos"), $"logo_{i}");
-            logoUpdated = true;
+            string dest = CopyMedium(logo.spriteData.path, Path.Combine(mediaFolder, "logos"), $"logo_{i}");
+            logoUpdated = dest != null;
+        }
+
+        // COPY OVER SPRITES
+        bool spritesUpdated = false;
+        for (int i = 0; i < spriteManager.sceneSprites.Length; i++)
+        {
+            var spriteData = spriteManager.sceneSprites[i];
+            if (string.IsNullOrEmpty(spriteData.path) || spriteData.texture == null)
+            {
+                continue;
+            }
+            string dest = CopyMedium(spriteData.path, Path.Combine(mediaFolder, "sprites"), $"sprite_{i}");
+            spritesUpdated = dest != null;
         }
 
         // COPY OVER MODELS
         bool modelsUpdated = false;
         foreach (var modelName in modelManager.GetModelNames())
         {
-            Debug.Log(modelName);
             var modelPath = modelManager.GetModelPath(modelName);
             if (string.IsNullOrEmpty(modelPath) || !File.Exists(modelPath))
             {
@@ -100,20 +113,15 @@ public class WorldSaver : MonoBehaviour
 
             string modelSourceFolder = Path.GetDirectoryName(modelPath);
             string destModelFolder = Path.Combine(mediaFolder, "models", modelName);
-            if (Directory.Exists(destModelFolder))
-            {
-                Directory.Delete(destModelFolder, true);
-            }
-            DirectoryCopyRecurse(modelSourceFolder, destModelFolder);
-            modelsUpdated = true;
-        }
 
+            modelsUpdated = DirectoryCopyRecurse(modelSourceFolder, destModelFolder);
+        }
 
         bool wasDeleted = DeleteUnusedScenes();
 
 
         SaveSceneOverview(sceneManager.sceneList.Values.ToList());
-        if (!wasDeleted && !changedScene && !logoUpdated && !modelsUpdated)
+        if (!wasDeleted && !changedScene && !logoUpdated && !modelsUpdated && !spritesUpdated)
         {
             InfoText.ShowInfo("Keine Änderungen vorhanden");
         }
@@ -123,8 +131,12 @@ public class WorldSaver : MonoBehaviour
         }
     }
 
-    void DirectoryCopyRecurse(string sourcePath, string destPath)
+    bool DirectoryCopyRecurse(string sourcePath, string destPath)
     {
+        if (sourcePath == destPath)
+        {
+            return false; // No need to copy if source and destination are the same
+        }
         if (!Directory.Exists(destPath))
         {
             Directory.CreateDirectory(destPath);
@@ -143,6 +155,7 @@ public class WorldSaver : MonoBehaviour
             string destDir = Path.Combine(destPath, dirName);
             DirectoryCopyRecurse(directoryPath, destDir);
         }
+        return true;
     }
 
     void MoveToTrash(string folderPath)
@@ -218,7 +231,7 @@ public class WorldSaver : MonoBehaviour
 
         if (source == destinationPath && File.Exists(destinationPath))
         {
-            return destFile;
+            return null; // No need to copy if the file already exists at the destination
         }
 
         try
@@ -303,25 +316,52 @@ public class WorldSaver : MonoBehaviour
         root.Add(scenesContainer);
 
         // LOGOS
-        if (logoLoadingOverlay.logoPaths.Length > 0)
+        if (spriteManager.logos.Length > 0)
         {
             XElement logosElement = new XElement("Logos");
 
-            for (int i = 0; i < logoLoadingOverlay.logoPaths.Length; i++)
+            for (int i = 0; i < spriteManager.logos.Length; i++)
             {
-                if (string.IsNullOrEmpty(logoLoadingOverlay.logoPaths[i]))
+                var logo = spriteManager.logos[i];
+                if (string.IsNullOrEmpty(logo.spriteData.path))
                 {
                     continue;
                 }
-                string path = Path.Combine(".media", "logos", "logo_" + i + Path.GetExtension(logoLoadingOverlay.logoPaths[i]));
-                XElement logoElement = new XElement("Logo");
-                logoElement.SetAttributeValue("id", i);
-                logoElement.SetAttributeValue("source", path);
-                logosElement.Add(logoElement);
+                string path = Path.Combine(".media", "logos", "logo_" + i + Path.GetExtension(logo.spriteData.path));
+                var el = MediaBuilder("Logo", path, id: i.ToString());
+                if (el != null)
+                {
+                    logosElement.Add(el);
+                }
             }
             if (logosElement.HasElements)
             {
                 root.Add(logosElement);
+            }
+        }
+
+        // SPRITES
+        if (spriteManager.sceneSprites.Length > 0)
+        {
+            XElement spritesElement = new XElement("Sprites");
+
+            for (int i = 0; i < spriteManager.sceneSprites.Length; i++)
+            {
+                var spriteData = spriteManager.sceneSprites[i];
+                if (string.IsNullOrEmpty(spriteData.path))
+                {
+                    continue;
+                }
+                string path = Path.Combine(".media", "sprites", "sprite_" + i + Path.GetExtension(spriteData.path));
+                var el = MediaBuilder("Sprite", path, id: i.ToString());
+                if (el != null)
+                {
+                    spritesElement.Add(el);
+                }
+            }
+            if (spritesElement.HasElements)
+            {
+                root.Add(spritesElement);
             }
         }
 
@@ -336,16 +376,11 @@ public class WorldSaver : MonoBehaviour
                 var modelFileName = Path.GetFileName(path);
 
                 var modelPath = Path.Combine(".media", "models", modelName, modelFileName);
-                if (string.IsNullOrEmpty(modelPath))
+                var el = MediaBuilder("Model", modelPath, modelName);
+                if (el != null)
                 {
-                    Debug.LogWarning($"Model path for {modelName} is empty");
-                    continue;
+                    modelsElement.Add(el);
                 }
-
-                XElement modelElement = new XElement("Model");
-                modelElement.SetAttributeValue("name", modelName);
-                modelElement.SetAttributeValue("source", modelPath);
-                modelsElement.Add(modelElement);
             }
             if (modelsElement.HasElements)
             {
@@ -363,6 +398,27 @@ public class WorldSaver : MonoBehaviour
 
         doc.Add(root);
         return doc;
+    }
+
+    XElement MediaBuilder(string tagName, string source, string name = "", string id = "")
+    {
+        if (string.IsNullOrEmpty(source))
+        {
+            Debug.LogWarning($"Model path for {(name == "" ? name : id)} is empty");
+            return null;
+        }
+
+        XElement modelElement = new XElement(tagName);
+        if (name != "")
+        {
+            modelElement.SetAttributeValue("name", name);
+        }
+        if (id != "")
+        {
+            modelElement.SetAttributeValue("id", id);
+        }
+        modelElement.SetAttributeValue("source", source);
+        return modelElement;
     }
 
     void SaveSceneOverview(List<Scene> scenes)

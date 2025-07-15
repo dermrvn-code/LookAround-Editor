@@ -29,7 +29,7 @@ public class ProjectManager : MonoBehaviour
     SceneManager sceneManager;
     SceneChanger sceneChanger;
     PanelManager panelManager;
-    LogoLoadingOverlay logoLoadingOverlay;
+    SpriteManager spriteManager;
 
     void Awake()
     {
@@ -41,7 +41,7 @@ public class ProjectManager : MonoBehaviour
         sceneManager = FindObjectOfType<SceneManager>();
         sceneChanger = FindObjectOfType<SceneChanger>();
         panelManager = FindObjectOfType<PanelManager>();
-        logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
+        spriteManager = FindObjectOfType<SpriteManager>();
     }
 
     public bool IsInProject()
@@ -83,21 +83,9 @@ public class ProjectManager : MonoBehaviour
         return Regex.Replace(str, @"[^\w ]", "").Trim();
     }
 
-    public void UpdateWorld(string name, string author, string description, bool newWorld = false, string[] paths = null)
+    public void UpdateWorld(string name, string author, string description, bool newWorld = false)
     {
         string initialProjectName = currentProjectName;
-
-        if (paths != null)
-        {
-            for (int i = 0; i < logoLoadingOverlay.logoPaths.Length; i++)
-            {
-                if (paths != null && paths.Length > i)
-                {
-                    logoLoadingOverlay.logoPaths[i] = paths[i];
-                    logoLoadingOverlay.LoadLogo(i, paths[i]);
-                }
-            }
-        }
 
         string cleanName = CleanUpString(name);
         string cleanAuthor = CleanUpString(author);
@@ -223,7 +211,7 @@ public class ProjectManager : MonoBehaviour
         unsavedChanges = false;
         isInProject = false;
 
-        logoLoadingOverlay.logoPaths = new string[3];
+        spriteManager.logos = new LogoData[3];
 
         if (projectNameText != null)
         {

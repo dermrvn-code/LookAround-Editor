@@ -29,6 +29,7 @@ public class SceneChanger : MonoBehaviour
     TextureManager textureManager;
     ModelManager modelManager;
     LogoLoadingOverlay loadingOverlay;
+    SpriteManager spriteManager;
 
     public Scene currentScene;
 
@@ -40,6 +41,7 @@ public class SceneChanger : MonoBehaviour
         panelManager = FindObjectOfType<PanelManager>();
         loadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
         modelManager = FindObjectOfType<ModelManager>();
+        spriteManager = FindObjectOfType<SpriteManager>();
 
         // To prevent particles in the editor window
         particlesGameobject.SetActive(true);
@@ -363,7 +365,7 @@ public class SceneChanger : MonoBehaviour
     public void LoadModel(SceneElementModel sceneElement)
     {
         DomePosition dp = modelManager.DisplayModel(sceneElement.modelName);
-        if(dp == null)
+        if (dp == null)
         {
             InfoText.ShowInfo($"Model '{sceneElement.modelName}' wurde nicht geladen.");
             return;
@@ -436,7 +438,7 @@ public class SceneChanger : MonoBehaviour
 
     public IEnumerator _FadeIn(Action<Action> sceneLoaded, int logoIndex)
     {
-        loadingOverlay.SetLogoFromIndex(logoIndex);
+        spriteManager.SetLogoFromIndex(logoIndex);
         loadingOverlay.FadeIn();
         yield return new WaitForSeconds(2f);
         sceneLoaded.Invoke(() =>
