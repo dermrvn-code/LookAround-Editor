@@ -22,6 +22,7 @@ public class SidebarSettingsManager : MonoBehaviour
     SceneChanger sceneChanger;
     SceneManager sceneManager;
     ProjectManager projectManager;
+    ModelManager modelManager;
     LogoLoadingOverlay logoLoadingOverlay;
 
 
@@ -33,6 +34,7 @@ public class SidebarSettingsManager : MonoBehaviour
         sceneChanger = FindObjectOfType<SceneChanger>();
         sceneManager = FindObjectOfType<SceneManager>();
         projectManager = FindObjectOfType<ProjectManager>();
+        modelManager = FindObjectOfType<ModelManager>();
         logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
 
         prefabDictionary = new Dictionary<string, GameObject>();
@@ -508,12 +510,11 @@ public class SidebarSettingsManager : MonoBehaviour
 
             if (!newWorld)
             {
-                worldSettings.InitializeWorldSettings(
+                worldSettings.Initialize(
                     projectManager.currentProjectName,
                     projectManager.currentAuthorName,
                     projectManager.currentProjectDescription,
-                    newWorld,
-                    logoLoadingOverlay.logoPaths
+                    newWorld
                 );
             }
             ReloadLayout();
@@ -532,6 +533,27 @@ public class SidebarSettingsManager : MonoBehaviour
             var appSettings = Instantiate(prefabDictionary["AppSettings"], sidebarContainer.transform).GetComponent<AppSettings>();
 
             appSettings.Initialize(projectManager.ProjectsPath);
+
+            ReloadLayout();
+            ProcessIndicator.Hide();
+        });
+    }
+
+    public void OpenMediaSettings()
+    {
+        ProcessIndicator.Show();
+        panelManager.SwitchToScene();
+        ClearSidebar(() =>
+        {
+            notAutomaticSave = true;
+            panelManager.SidebarSetActive(true);
+
+            var worldSettings = Instantiate(prefabDictionary["MediaSettings"], sidebarContainer.transform).GetComponent<MediaSettings>();
+
+            worldSettings.Initialize(
+                logoLoadingOverlay.logoPaths,
+                modelManager.GetModelNames()
+            );
 
             ReloadLayout();
             ProcessIndicator.Hide();

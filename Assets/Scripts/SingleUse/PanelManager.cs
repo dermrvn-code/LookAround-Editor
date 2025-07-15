@@ -142,6 +142,18 @@ public class PanelManager : MonoBehaviour
         }
     }
 
+    public void OpenMediaSettings()
+    {
+        if (projectManager.IsInProject())
+        {
+            sidebarSettingsManager.OpenMediaSettings();
+        }
+        else
+        {
+            InfoText.ShowInfo("Lade ein Projekt, um die Medieneinstellungen zu bearbeiten.");
+        }
+    }
+
     public void OpenAppSetings()
     {
         sidebarSettingsManager.OpenAppSettings();

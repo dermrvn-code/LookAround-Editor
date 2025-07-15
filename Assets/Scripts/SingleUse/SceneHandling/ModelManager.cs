@@ -4,15 +4,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using Siccity.GLTFUtility;
 using UnityEngine.Events;
+using System.Linq;
 
 
 public class ModelManager : MonoBehaviour
 {
     [SerializeField]
-    int maxModels = 8;
+    int maxModels = 3;
 
     [SerializeField]
     Dictionary<string, GameObject> loadedModels = new Dictionary<string, GameObject>();
+    Dictionary<string, GameObject> previewModels = new Dictionary<string, GameObject>();
+
+    Dictionary<string, RenderTexture> textures = new Dictionary<string, RenderTexture>();
+    Dictionary<string, string> modelPaths = new Dictionary<string, string>();
 
     [SerializeField]
     GameObject sceneElementsContainer;
@@ -24,8 +29,10 @@ public class ModelManager : MonoBehaviour
     Renderer domeRenderer;
 
 
+    ThumbnailMaker thumbnailMaker;
     void Start()
     {
+        thumbnailMaker = FindObjectOfType<ThumbnailMaker>();
         if (domeRenderer == null)
         {
             Debug.LogWarning("No Renderer found on dome.");
@@ -35,6 +42,19 @@ public class ModelManager : MonoBehaviour
         {
             Debug.LogWarning("sceneElementsContainer or dome is not assigned.");
         }
+    }
+
+    public string GetModelPath(string modelName)
+    {
+        string path = modelPaths[modelName];
+        Debug.Log($"{modelName}: {path}");
+
+        if (string.IsNullOrEmpty(path))
+        {
+            Debug.LogWarning("Model name is null or empty.");
+            return null;
+        }
+        return path;
     }
 
 
@@ -93,14 +113,95 @@ public class ModelManager : MonoBehaviour
         }
     }
 
-    public void LoadModel(string filepath, string modelName, UnityAction onLoaded = null)
+    public void LoadModel(string filepath, string modelName, UnityAction<GameObject, RenderTexture> onLoaded = null, bool preview = false)
     {
         Importer.ImportGLTFAsync(filepath, new ImportSettings(), (GameObject result, AnimationClip[] clips) =>
         {
-            IntegrateModel(modelName, result);
-            onLoaded?.Invoke();
-            Debug.Log($"Model {modelName} loaded from {filepath}");
+            modelPaths[modelName] = filepath;
+
+            if (!preview)
+            {
+                IntegrateModel(modelName, result);
+                Debug.Log($"Model {modelName} loaded from {filepath}");
+            }
+            else
+            {
+                PreviewModel(modelName, result);
+                Debug.Log($"Preview model loaded from {filepath}");
+            }
+
+            RenderTexture rt = CreateThumbnail(result, modelName, preview);
+            if (rt == null)
+            {
+                Debug.LogError("Failed to create thumbnail for model: " + modelName);
+                return;
+            }
+            onLoaded?.Invoke(result, rt);
         });
+    }
+
+    public RenderTexture GetThumbnail(string modelName)
+    {
+        if (textures.TryGetValue(modelName, out RenderTexture rt))
+        {
+            return rt;
+        }
+        Debug.LogWarning("Thumbnail not found for model: " + modelName);
+        return null;
+    }
+
+    RenderTexture CreateThumbnail(GameObject model, string modelName, bool preview = false)
+    {
+        RenderTexture rt = thumbnailMaker.CreateThumbnail(model);
+        if (rt != null)
+        {
+            textures[modelName] = rt;
+        }
+        return rt;
+    }
+
+    public void StorePreviewModel(string modelName, string newModelName = null)
+    {
+        if (string.IsNullOrEmpty(newModelName))
+        {
+            newModelName = modelName;
+        }
+
+        if (!previewModels.ContainsKey(modelName))
+        {
+            Debug.LogWarning("No preview model to store.");
+            return;
+        }
+
+        if (loadedModels.ContainsKey(modelName))
+        {
+            Debug.LogWarning("Model already exists with this name: " + modelName);
+            return;
+        }
+
+        IntegrateModel(newModelName, previewModels[modelName]);
+        previewModels.Remove(modelName);
+    }
+
+    public void RemovePreviewModel(string modelName)
+    {
+        if (previewModels.ContainsKey(modelName))
+        {
+            previewModels.TryGetValue(modelName, out GameObject model);
+            previewModels.Remove(modelName);
+            textures.Remove(modelName);
+            modelPaths.Remove(modelName);
+            if (model != null)
+            {
+                Destroy(model);
+            }
+            Debug.Log($"Preview model {modelName} removed.");
+            return;
+        }
+        else
+        {
+            Debug.LogWarning("Preview model not found: " + modelName);
+        }
     }
 
     public void UnloadModel(string modelName)
@@ -109,6 +210,8 @@ public class ModelManager : MonoBehaviour
         {
             loadedModels.TryGetValue(modelName, out GameObject model);
             loadedModels.Remove(modelName);
+            textures.Remove(modelName);
+            modelPaths.Remove(modelName);
             if (model != null)
             {
                 Destroy(model);
@@ -117,6 +220,11 @@ public class ModelManager : MonoBehaviour
             return;
         }
         Debug.LogWarning("Model not found in loaded models: " + modelName);
+    }
+
+    public string[] GetModelNames(int? maxModels = null)
+    {
+        return loadedModels.Keys.Take(maxModels.GetValueOrDefault(this.maxModels)).ToArray();
     }
 
     float realismFactor = 0.3f;
@@ -165,6 +273,27 @@ public class ModelManager : MonoBehaviour
         model.transform.localScale = Vector3.one * scaleFactor;
     }
 
+    void PreviewModel(string modelName, GameObject result)
+    {
+        if (previewModels.Count >= maxModels)
+        {
+            Debug.LogWarning("Maximum number of models previewed. Cannot load more.");
+            return;
+        }
+
+        if (previewModels.ContainsKey(modelName))
+        {
+            Debug.LogWarning("Preview model already exists with this name: " + modelName);
+            return;
+        }
+
+        NormalizeModel(result);
+        result.transform.SetParent(siding.transform, false);
+        result.gameObject.SetActive(false);
+
+        previewModels.Add(modelName, result);
+    }
+
     void IntegrateModel(string modelName, GameObject result)
     {
         if (loadedModels.Count >= maxModels)
@@ -195,7 +324,19 @@ public class ModelManager : MonoBehaviour
                 Destroy(model);
             }
         }
+        foreach (var model in previewModels.Values)
+        {
+            if (model != null)
+            {
+                Destroy(model);
+            }
+        }
+
         loadedModels.Clear();
+        previewModels.Clear();
+        textures.Clear();
+        modelPaths.Clear();
+
         Debug.Log("All models unloaded.");
     }
 

@@ -13,9 +13,6 @@ public class WorldSettings : MonoBehaviour
     public TextInput worldDescriptionInput;
 
 
-    public MediaUploader[] logos = new MediaUploader[3];
-
-
     public TMP_Text title;
 
     public string creationTitle = "Welt erstellen";
@@ -39,33 +36,15 @@ public class WorldSettings : MonoBehaviour
             return;
         }
 
-        List<string> logoPaths = new List<string>();
-        foreach (var logo in logos)
-        {
-            if (!string.IsNullOrEmpty(logo.value))
-            {
-                if (!File.Exists(logo.value))
-                {
-                    InfoText.ShowInfo($"Logo-Datei '{logo.value}' existiert nicht.");
-                    continue;
-                }
-                logoPaths.Add(logo.value);
-            }
-        }
 
-        projectManager.UpdateWorld(worldName, worldAuthor, worldDescription, newWorld, logoPaths.ToArray());
+        projectManager.UpdateWorld(worldName, worldAuthor, worldDescription, newWorld);
     }
 
-    public void InitializeWorldSettings(string name, string author, string description, bool isNewWorld, string[] paths = null)
+    public void Initialize(string name, string author, string description, bool isNewWorld)
     {
         worldNameInput.Initialize(name);
         worldAuthorInput.Initialize(author);
         worldDescriptionInput.Initialize(description);
-
-        for (int i = 0; i < paths.Length; i++)
-        {
-            logos[i].Initialize(paths[i]);
-        }
 
         newWorld = isNewWorld;
         if (isNewWorld)

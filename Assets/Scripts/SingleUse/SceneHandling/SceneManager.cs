@@ -77,10 +77,17 @@ public class SceneManager : MonoBehaviour
             string modelName = model.Key;
             string modelPath = model.Value;
 
-            modelManager.LoadModel(modelPath, modelName, () =>
+            try
             {
-                loadingBar.IncreaseLoader(maxLoadingSteps, "Lädt Model: " + Path.GetFileName(modelPath));
-            });
+                modelManager.LoadModel(modelPath, modelName, (GameObject obj, RenderTexture rt) =>
+                {
+                    loadingBar.IncreaseLoader(maxLoadingSteps, "Lädt Model: " + Path.GetFileName(modelPath));
+                });
+            }
+            catch
+            {
+                InfoText.ShowInfo($"Model '{modelName}' konnte nicht geladen werden.");
+            }
         }
         return true;
     }

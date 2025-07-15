@@ -22,11 +22,13 @@ public class WorldSaver : MonoBehaviour
 
     SceneManager sceneManager;
     ProjectManager projectManager;
+    ModelManager modelManager;
     LogoLoadingOverlay logoLoadingOverlay;
     void Start()
     {
         sceneManager = GetComponent<SceneManager>();
         projectManager = FindObjectOfType<ProjectManager>();
+        modelManager = FindObjectOfType<ModelManager>();
         logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
     }
 
@@ -63,7 +65,13 @@ public class WorldSaver : MonoBehaviour
                 changedScene = true;
             }
         }
-        bool wasDeleted = DeleteUnusedScenes();
+
+        string mediaFolder = Path.Combine(projectManager.currentFolderPath, ".media");
+
+        if (!Directory.Exists(mediaFolder))
+        {
+            Directory.CreateDirectory(mediaFolder);
+        }
 
         // COPY OVER LOGOS
         bool logoUpdated = false;
@@ -74,19 +82,66 @@ public class WorldSaver : MonoBehaviour
             {
                 continue;
             }
-            CopyMedium(logoPath, projectManager.currentFolderPath, $"logo_{i}");
+            CopyMedium(logoPath, Path.Combine(mediaFolder, "logos"), $"logo_{i}");
             logoUpdated = true;
         }
 
+        // COPY OVER MODELS
+        bool modelsUpdated = false;
+        foreach (var modelName in modelManager.GetModelNames())
+        {
+            Debug.Log(modelName);
+            var modelPath = modelManager.GetModelPath(modelName);
+            if (string.IsNullOrEmpty(modelPath) || !File.Exists(modelPath))
+            {
+                Debug.LogWarning($"Model path for {modelName} is empty or does not exist.");
+                continue;
+            }
+
+            string modelSourceFolder = Path.GetDirectoryName(modelPath);
+            string destModelFolder = Path.Combine(mediaFolder, "models", modelName);
+            if (Directory.Exists(destModelFolder))
+            {
+                Directory.Delete(destModelFolder, true);
+            }
+            DirectoryCopyRecurse(modelSourceFolder, destModelFolder);
+            modelsUpdated = true;
+        }
+
+
+        bool wasDeleted = DeleteUnusedScenes();
+
 
         SaveSceneOverview(sceneManager.sceneList.Values.ToList());
-        if (!wasDeleted && !changedScene && !logoUpdated)
+        if (!wasDeleted && !changedScene && !logoUpdated && !modelsUpdated)
         {
             InfoText.ShowInfo("Keine Änderungen vorhanden");
         }
         else
         {
             InfoText.ShowInfo("Projekt gespeichert in " + projectManager.currentFolderPath);
+        }
+    }
+
+    void DirectoryCopyRecurse(string sourcePath, string destPath)
+    {
+        if (!Directory.Exists(destPath))
+        {
+            Directory.CreateDirectory(destPath);
+        }
+
+        foreach (string filePath in Directory.GetFiles(sourcePath))
+        {
+            string fileName = Path.GetFileName(filePath);
+            string destFile = Path.Combine(destPath, fileName);
+            File.Copy(filePath, destFile, true);
+        }
+
+        foreach (string directoryPath in Directory.GetDirectories(sourcePath))
+        {
+            string dirName = Path.GetFileName(directoryPath);
+            string destDir = Path.Combine(destPath, dirName);
+            DirectoryCopyRecurse(directoryPath, destDir);
         }
     }
 
@@ -120,6 +175,7 @@ public class WorldSaver : MonoBehaviour
         }
     }
 
+    string[] excludeFolders = new string[] { ".media", ".trash" };
     bool DeleteUnusedScenes()
     {
         bool deleted = false;
@@ -130,6 +186,11 @@ public class WorldSaver : MonoBehaviour
 
         foreach (var directory in Directory.GetDirectories(projectManager.currentFolderPath))
         {
+            if (excludeFolders.Any(exclude => directory.EndsWith(exclude, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
             string sceneName = Path.GetFileName(directory);
 
             if (!sceneManager.sceneList.ContainsKey(sceneName))
@@ -141,10 +202,17 @@ public class WorldSaver : MonoBehaviour
         return deleted;
     }
 
+
+
     string CopyMedium(string source, string destinationFolder, string filename)
     {
         string extension = Path.GetExtension(source);
         string destFile = filename + extension;
+
+        if (!Directory.Exists(destinationFolder))
+        {
+            Directory.CreateDirectory(destinationFolder);
+        }
 
         string destinationPath = Path.Combine(destinationFolder, destFile);
 
@@ -245,14 +313,43 @@ public class WorldSaver : MonoBehaviour
                 {
                     continue;
                 }
+                string path = Path.Combine(".media", "logos", "logo_" + i + Path.GetExtension(logoLoadingOverlay.logoPaths[i]));
                 XElement logoElement = new XElement("Logo");
                 logoElement.SetAttributeValue("id", i);
-                logoElement.SetAttributeValue("source", Path.Combine("logo_" + i + Path.GetExtension(logoLoadingOverlay.logoPaths[i])));
+                logoElement.SetAttributeValue("source", path);
                 logosElement.Add(logoElement);
             }
             if (logosElement.HasElements)
             {
                 root.Add(logosElement);
+            }
+        }
+
+        // MODELS
+        XElement modelsElement = new XElement("Models");
+        var modelNames = modelManager.GetModelNames();
+        if (modelNames.Length > 0)
+        {
+            foreach (var modelName in modelNames)
+            {
+                var path = modelManager.GetModelPath(modelName);
+                var modelFileName = Path.GetFileName(path);
+
+                var modelPath = Path.Combine(".media", "models", modelName, modelFileName);
+                if (string.IsNullOrEmpty(modelPath))
+                {
+                    Debug.LogWarning($"Model path for {modelName} is empty");
+                    continue;
+                }
+
+                XElement modelElement = new XElement("Model");
+                modelElement.SetAttributeValue("name", modelName);
+                modelElement.SetAttributeValue("source", modelPath);
+                modelsElement.Add(modelElement);
+            }
+            if (modelsElement.HasElements)
+            {
+                root.Add(modelsElement);
             }
         }
 

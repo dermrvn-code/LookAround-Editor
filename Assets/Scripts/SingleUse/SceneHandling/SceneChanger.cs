@@ -363,6 +363,11 @@ public class SceneChanger : MonoBehaviour
     public void LoadModel(SceneElementModel sceneElement)
     {
         DomePosition dp = modelManager.DisplayModel(sceneElement.modelName);
+        if(dp == null)
+        {
+            InfoText.ShowInfo($"Model '{sceneElement.modelName}' wurde nicht geladen.");
+            return;
+        }
         dp.position.x = sceneElement.x;
         dp.position.y = sceneElement.y;
         dp.distance = sceneElement.distance;
