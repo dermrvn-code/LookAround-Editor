@@ -7,22 +7,46 @@ public class Debugger : MonoBehaviour
 {
 
     [SerializeField]
-    List<string> previewModels = new List<string>();
+    List<Scene> scenes = new List<Scene>();
 
+    [SerializeField]
+    Scene scene;
 
-    ModelManager modelManager;
+    [SerializeField]
+    List<SceneElement> sceneElements = new List<SceneElement>();
+
+    [SerializeField]
+    float amountOfElements = 0;
+
+    SceneManager sceneManager;
+    SceneChanger sceneChanger;
     void Start()
     {
-        modelManager = FindAnyObjectByType<ModelManager>();
+        sceneManager = FindObjectOfType<SceneManager>();
+        sceneChanger = FindObjectOfType<SceneChanger>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        previewModels.Clear();
-        foreach (var m in modelManager.previewModels.Keys)
+        if (sceneManager.sceneList.Count > 0)
         {
-            previewModels.Add(m);
+            scenes = sceneManager.sceneList.Values.ToList();
+        }
+        else
+        {
+            scenes.Clear();
+        }
+
+        if (sceneChanger.currentScene != null)
+        {
+            scene = sceneChanger.currentScene;
+            if (sceneManager.sceneList.ContainsKey(scene.Name))
+            {
+                var list = sceneManager.sceneList[scene.Name].SceneElements.Values.ToList();
+                sceneElements = list;
+                amountOfElements = list.Count;
+            }
         }
     }
 }

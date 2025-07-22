@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
@@ -76,6 +77,9 @@ public class SidebarSettingsManager : MonoBehaviour
             if (target.TryGetComponent(out DomePosition domePosition))
                 AddDomePosition(domePosition);
 
+            if (target.TryGetComponent(out ModelTransform modelTransform))
+                AddModelTransform(modelTransform);
+
             if (target.TryGetComponent(out Interactable interactable))
                 AddOnAction(interactable);
 
@@ -87,6 +91,9 @@ public class SidebarSettingsManager : MonoBehaviour
 
             if (target.TryGetComponent(out TMP_Text text))
                 AddText(text);
+
+            if (target.TryGetComponent(out InteractableModel model))
+                AddModel(model);
 
             if (target.TryGetComponent(out SceneElementHolder holder)) // always true, as functions checks target for SceneElementHolder
                 AddDeleteElement(holder);                              // maybe add other check later, it needed, for now every element can be deleted
@@ -128,8 +135,15 @@ public class SidebarSettingsManager : MonoBehaviour
         {
             Dialog.ShowDialogConfirm("Möchtest du das Element wirklich löschen?", () =>
             {
-                sceneChanger.currentScene.SceneElements.Remove(holder.sceneElement.id);
+                if (holder.TryGetComponent(out InteractableModel interactableModel))
+                {
+                    string modelName = interactableModel.elementContainer.transform.childCount > 0
+                        ? interactableModel.elementContainer.transform.GetChild(0).gameObject.name
+                        : "";
+                    modelManager.HideModel(modelName);
+                }
                 Destroy(holder.gameObject);
+                sceneChanger.currentScene.SceneElements.Remove(holder.sceneElement.id);
                 Deselect();
                 panelManager.CloseSidebar();
             });
@@ -274,10 +288,70 @@ public class SidebarSettingsManager : MonoBehaviour
         });
     }
 
+    public void AddModel(InteractableModel interactableModel)
+    {
+        GameObject gameObject = interactableModel.elementContainer.transform.childCount > 0
+            ? interactableModel.elementContainer.transform.GetChild(0).gameObject
+            : null;
+
+        if (gameObject == null)
+        {
+            Debug.LogError("InteractableModel has no model assigned.");
+            return;
+        }
+
+        SceneElementModel sceneElement = (SceneElementModel)interactableModel.GetComponent<SceneElementHolder>()?.sceneElement;
+
+
+        var modelSelection = Instantiate(prefabDictionary["SpriteSelector"], sidebarContainer.transform).GetComponent<SpriteSelector>();
+
+        var selectedModelName = gameObject.name;
+        var allModels = modelManager.GetAllModels();
+        var spritePairs = new Pairs.SpritePair[allModels.Count];
+
+        int index = 0;
+        for (int i = 0; i < allModels.Count; i++)
+        {
+            var model = allModels.ElementAt(i);
+
+            if (model.name != selectedModelName && model.used)
+            {
+                continue;
+            }
+
+            var texture = model.preview;
+            var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+
+            spritePairs[index] = new Pairs.SpritePair { value = model.name, sprite = sprite };
+            index++;
+        }
+
+        modelSelection.Initialize(spritePairs, selectedModelName, "Model-Auswahl");
+
+
+        modelSelection.OnElementSelected.AddListener(value =>
+        {
+            string modelName = interactableModel.elementContainer.transform.childCount > 0
+                ? interactableModel.elementContainer.transform.GetChild(0).gameObject.name
+                : "null";
+
+            modelManager.SwitchModel(interactableModel.gameObject, modelName, value);
+
+            sceneElement.modelName = value;
+            UpdateSceneElement(sceneElement);
+        });
+    }
+
     public void AddDomePosition(DomePosition domePosition)
     {
+        bool tiltEnabled = true;
+        if (domePosition.TryGetComponent(out ModelTransform _))
+        {
+            tiltEnabled = false;
+        }
+
         var domePositionInput = Instantiate(prefabDictionary["DomePosition"], sidebarContainer.transform).GetComponent<DomePositionInput>();
-        domePositionInput.Initialize((int)domePosition.position.x, (int)domePosition.position.y, domePosition.distance, (int)domePosition.xRotOffset);
+        domePositionInput.Initialize((int)domePosition.position.x, (int)domePosition.position.y, domePosition.distance, (int)domePosition.xRotOffset, tiltEnabled: tiltEnabled);
 
         var sceneElement = domePosition.GetComponent<SceneElementHolder>()?.sceneElement;
 
@@ -293,6 +367,29 @@ public class SidebarSettingsManager : MonoBehaviour
                 sceneElement.y = y;
                 sceneElement.distance = distance;
                 sceneElement.xRotationOffset = tilt;
+                UpdateSceneElement(sceneElement);
+            }
+        });
+    }
+
+    public void AddModelTransform(ModelTransform modelTransform)
+    {
+        var modelTransformInput = Instantiate(prefabDictionary["ModelTransform"], sidebarContainer.transform).GetComponent<ModelTransformInput>();
+        modelTransformInput.Initialize((int)modelTransform.rotation.x, (int)modelTransform.rotation.y, (int)modelTransform.rotation.z, (int)modelTransform.scale);
+
+        var sceneElement = (SceneElementModel)modelTransform.GetComponent<SceneElementHolder>()?.sceneElement;
+
+        modelTransformInput.OnInputChanged.AddListener((x, y, z, scale) =>
+        {
+            modelTransform.rotation = new Vector3(x, y, z);
+            modelTransform.scale = scale;
+
+            if (sceneElement != null)
+            {
+                sceneElement.xRotation = x;
+                sceneElement.yRotation = y;
+                sceneElement.zRotation = z;
+                sceneElement.scale = scale;
                 UpdateSceneElement(sceneElement);
             }
         });
@@ -464,6 +561,11 @@ public class SidebarSettingsManager : MonoBehaviour
             sceneChanger.currentScene.HasUnsavedChanges = true;
             projectManager.unsavedChanges = true;
         }
+        else
+        {
+            Debug.LogError("SceneElement with ID " + sceneElement.id + " not found in current scene.");
+            return;
+        }
     }
 
     public void Deselect(bool closeSidebar = false)
@@ -614,6 +716,7 @@ public class SidebarSettingsManager : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 GameObject target = hit.collider.gameObject;
+
                 if (target.TryGetComponent(out SceneElementHolder _))
                 {
                     Select(target);

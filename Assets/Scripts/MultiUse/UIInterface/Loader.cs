@@ -39,7 +39,7 @@ public class Loader : MonoBehaviour
             loadingText.text = text;
         }
 
-        if (currentStep >= maxSteps)
+        if (currentStep + 1 >= maxSteps)
         {
             onFull?.Invoke();
         }
@@ -47,10 +47,10 @@ public class Loader : MonoBehaviour
 
     public void OnFull(Action onFull)
     {
-        onFull = () =>
+        this.onFull = () =>
         {
             onFull?.Invoke();
-            onFull = null;
+            this.onFull = null;
             currentStep = 0;
         };
     }

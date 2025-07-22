@@ -137,7 +137,8 @@ public class SceneChanger : MonoBehaviour
         {
             currentScene = scene;
             LoadSceneElements(scene.SceneElements);
-            if (ih != null) ih.updateElementsNextFrame = true;
+
+            if (ih != null) ih.updateElementsNextFrame = true; ;
 
 
             try
@@ -364,23 +365,34 @@ public class SceneChanger : MonoBehaviour
 
     public void LoadModel(SceneElementModel sceneElement)
     {
-        DomePosition dp = modelManager.DisplayModel(sceneElement.modelName);
-        if (dp == null)
+        GameObject model = modelManager.DisplayModel(sceneElement.modelName);
+        if (model == null)
         {
             InfoText.ShowInfo($"Model '{sceneElement.modelName}' wurde nicht geladen.");
             return;
         }
+        DomePosition dp = model.GetComponent<DomePosition>();
+
         dp.position.x = sceneElement.x;
         dp.position.y = sceneElement.y;
         dp.distance = sceneElement.distance;
         dp.xRotOffset = sceneElement.xRotationOffset;
 
+        ModelTransform modelTransform = model.GetComponent<ModelTransform>();
+
+        modelTransform.rotation.x = sceneElement.xRotation;
+        modelTransform.rotation.y = sceneElement.yRotation;
+        modelTransform.rotation.z = sceneElement.zRotation;
+        modelTransform.scale = sceneElement.scale;
 
         InteractableModel interactableModel = dp.GetComponent<InteractableModel>();
         interactableModel.OnInteract.AddListener(() =>
         {
             ActionParser(sceneElement.action);
         });
+
+        dp.gameObject.AddComponent<SceneElementHolder>().sceneElement = sceneElement;
+
     }
 
 

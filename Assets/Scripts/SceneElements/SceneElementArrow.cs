@@ -1,3 +1,4 @@
+[System.Serializable]
 public class SceneElementArrow : SceneElement
 {
     public int rotation;

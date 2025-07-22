@@ -159,12 +159,10 @@ public class ProjectManager : MonoBehaviour
         {
             projectNameText.text = currentProjectName;
             panelManager.UpdateSceneList();
-            loader.gameObject.SetActive(false);
             sceneChanger.ToStartScene();
             panelManager.SwitchToScene();
+            loader.gameObject.SetActive(false);
             isInProject = true;
-
-
         });
         if (!success)
         {

@@ -63,6 +63,7 @@ public class WorldSaver : MonoBehaviour
             {
                 SaveScene(scene);
                 changedScene = true;
+                scene.HasUnsavedChanges = false;
             }
         }
 
@@ -121,6 +122,8 @@ public class WorldSaver : MonoBehaviour
 
 
         SaveSceneOverview(sceneManager.sceneList.Values.ToList());
+        projectManager.unsavedChanges = false;
+
         if (!wasDeleted && !changedScene && !logoUpdated && !modelsUpdated && !spritesUpdated)
         {
             InfoText.ShowInfo("Keine Änderungen vorhanden");
@@ -262,10 +265,13 @@ public class WorldSaver : MonoBehaviour
         string file = CopyMedium(scene.Source, sceneFolderPath, scene.Name);
         if (file == null)
         {
-            return;
+            string destinationPath = Path.Combine(sceneFolderPath, scene.Name + Path.GetExtension(scene.Source));
+            if (scene.Source != destinationPath)
+            {
+                Debug.LogWarning("Failed to copy scene file: " + scene.Name);
+                return;
+            }
         }
-
-
         XDocument doc = ParseScene(scene, file);
         if (doc == null)
         {
@@ -477,40 +483,70 @@ public class WorldSaver : MonoBehaviour
 
     XElement ParseSceneElements(XElement sceneElement, Dictionary<int, SceneElement> sceneElements)
     {
+        Debug.Log($"Parsing {sceneElements.Count} scene elements for scene: {sceneElement.Attribute("name")?.Value}");
         foreach (var element in sceneElements.Values)
         {
             XElement elementNode = new XElement("Element");
             elementNode.SetAttributeValue("x", element.x.ToString());
             elementNode.SetAttributeValue("y", element.y.ToString());
+            elementNode.SetAttributeValue("distance", element.distance.ToString());
+            elementNode.SetAttributeValue("xRotationOffset", element.xRotationOffset.ToString());
 
             if (element is SceneElementArrow)
             {
                 elementNode.SetAttributeValue("type", "directionarrow");
 
                 SceneElementArrow arrow = (SceneElementArrow)element;
-                elementNode.SetAttributeValue("distance", arrow.distance.ToString());
                 elementNode.SetAttributeValue("rotation", arrow.rotation.ToString());
                 elementNode.SetAttributeValue("action", arrow.action);
                 elementNode.SetAttributeValue("color", arrow.color);
+                Debug.Log($"Saving SceneElementArrow: {arrow.action} at position ({arrow.x}, {arrow.y}) with distance {arrow.distance}");
             }
             else if (element is SceneElementTextbox)
             {
                 elementNode.SetAttributeValue("type", "textbox");
 
                 SceneElementTextbox textbox = (SceneElementTextbox)element;
-                elementNode.SetAttributeValue("distance", textbox.distance.ToString());
                 elementNode.SetAttributeValue("icon", textbox.icon);
                 elementNode.Add(textbox.text);
+                Debug.Log($"Saving SceneElementTextbox: {textbox.text} at position ({textbox.x}, {textbox.y}) with distance {textbox.distance}");
             }
             else if (element is SceneElementText)
             {
                 elementNode.SetAttributeValue("type", "text");
 
                 SceneElementText text = (SceneElementText)element;
-                elementNode.SetAttributeValue("distance", text.distance.ToString());
                 elementNode.SetAttributeValue("action", text.action);
                 elementNode.Add(text.text);
+                Debug.Log($"Saving SceneElementText: {text.text} at position ({text.x}, {text.y}) with distance {text.distance}");
             }
+            else if (element is SceneElementModel)
+            {
+                elementNode.SetAttributeValue("type", "model");
+
+                SceneElementModel model = (SceneElementModel)element;
+                elementNode.SetAttributeValue("name", model.modelName);
+                elementNode.SetAttributeValue("scale", model.scale.ToString());
+                elementNode.SetAttributeValue("rotationX", model.xRotation.ToString());
+                elementNode.SetAttributeValue("rotationY", model.yRotation.ToString());
+                elementNode.SetAttributeValue("rotationZ", model.zRotation.ToString());
+
+                elementNode.SetAttributeValue("action", model.action);
+                Debug.Log($"Saving SceneElementModel: {model.modelName} at position ({model.x}, {model.y}) with distance {model.distance}");
+            }
+            else
+            {
+                Debug.Log("SceneElement of unknown type found: " + element.GetType());
+            }
+            // else if (element is SceneElementSprite)
+            // {
+            //     elementNode.SetAttributeValue("type", "sprite");
+
+            //     SceneElementSprite sprite = (SceneElementSprite)element;
+            //     elementNode.SetAttributeValue("distance", sprite.distance.ToString());
+            //     elementNode.SetAttributeValue("action", sprite.action);
+            //     elementNode.SetAttributeValue("spriteName", sprite.spriteName);
+            // }
 
             sceneElement.Add(elementNode);
         }

@@ -1,3 +1,4 @@
+[System.Serializable]
 public class SceneElementTextbox : SceneElement
 {
     public string text;

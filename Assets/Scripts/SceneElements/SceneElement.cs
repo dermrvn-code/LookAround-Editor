@@ -1,3 +1,4 @@
+[System.Serializable]
 public abstract class SceneElement
 {
     public int id;

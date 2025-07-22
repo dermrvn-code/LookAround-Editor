@@ -7,7 +7,7 @@ public class InteractableModel : Interactable
     // Start is called before the first frame update
     private Animation anim;
 
-    public GameObject animationContainer;
+    public GameObject elementContainer;
 
 
     public override void Setup()

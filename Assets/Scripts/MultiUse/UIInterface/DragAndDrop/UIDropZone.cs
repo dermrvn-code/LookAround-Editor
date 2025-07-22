@@ -59,6 +59,12 @@ public class UIDropZone : MonoBehaviour
             case DragItemType.Textbox:
                 elementInitManager.InitTextbox(pos);
                 break;
+            case DragItemType.Model:
+                elementInitManager.InitModel(pos);
+                break;
+            case DragItemType.Sprite:
+                elementInitManager.InitSprite(pos);
+                break;
             default:
                 Debug.LogWarning("Unknown item type dropped");
                 break;

@@ -31,6 +31,8 @@ public class ModelUploader : MonoBehaviour
 
     public string modelName;
 
+    public bool changedSinceInitialization = false;
+
     void Awake()
     {
         modelManager = FindObjectOfType<ModelManager>();
@@ -79,17 +81,18 @@ public class ModelUploader : MonoBehaviour
         if (preview)
         {
             ProcessIndicator.Show();
-            modelManager.LoadModel(path, modelName, onLoaded: (GameObject obj, RenderTexture rt) =>
+            modelManager.LoadModel(path, modelName, onLoaded: (GameObject obj, Texture2D rt) =>
             {
                 DisplayTexture(rt);
                 OnValueChanged?.Invoke(path, modelName);
+                changedSinceInitialization = true;
                 value = path;
                 ProcessIndicator.Hide();
             }, preview: true);
         }
         else
         {
-            RenderTexture rt = modelManager.GetThumbnail(modelName);
+            Texture2D rt = modelManager.GetThumbnail(modelName);
             if (rt == null)
             {
                 Debug.LogError("Thumbnail not found for model: " + modelName);
@@ -100,11 +103,11 @@ public class ModelUploader : MonoBehaviour
 
     }
 
-    void DisplayTexture(RenderTexture rt)
+    void DisplayTexture(Texture2D rt)
     {
         if (rt == null)
         {
-            Debug.LogError("RenderTexture is null.");
+            Debug.LogError("Texture is null.");
             return;
         }
 
@@ -125,6 +128,7 @@ public class ModelUploader : MonoBehaviour
     IEnumerator _Clear()
     {
         modelPath.text = emptyModelPath;
+        modelName = string.Empty;
         animator.SetBool("Open", false);
         OnValueChanged?.Invoke(string.Empty, string.Empty);
         yield return new WaitForSeconds(1f);
@@ -142,6 +146,7 @@ public class ModelUploader : MonoBehaviour
             this.label.text = label;
         }
 
+        changedSinceInitialization = false;
         string path = modelManager.GetModelPath(modelName);
         this.modelName = modelName;
         value = path;

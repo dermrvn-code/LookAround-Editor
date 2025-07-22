@@ -10,6 +10,7 @@ public class DomePositionInput : MonoBehaviour
 
     public UnityEvent<int, int, int, int> OnInputChanged = new UnityEvent<int, int, int, int>();
 
+    public bool tiltEnabled = true;
 
     void SetupListener()
     {
@@ -42,23 +43,36 @@ public class DomePositionInput : MonoBehaviour
                 tilt.value
             );
         });
-        tilt.OnValueChanged.AddListener((value) =>
+        if (tiltEnabled)
         {
-            OnInputChanged.Invoke(
-                xPos.value,
-                yPos.value,
-                distance.value,
-                value
-            );
-        });
+            tilt.OnValueChanged.AddListener((value) =>
+            {
+                OnInputChanged.Invoke(
+                    xPos.value,
+                    yPos.value,
+                    distance.value,
+                    value
+                );
+            });
+        }
     }
 
-    public void Initialize(int x, int y, int dist, int tiltVal)
+    public void Initialize(int x, int y, int dist, int tiltVal, bool tiltEnabled = true)
     {
+        this.tiltEnabled = tiltEnabled;
+
         xPos.Initialize(x);
         yPos.Initialize(y);
         distance.Initialize(dist);
-        tilt.Initialize(tiltVal);
+
+        if (tiltEnabled)
+        {
+            tilt.Initialize(tiltVal);
+        }
+        else
+        {
+            tilt.gameObject.SetActive(false);
+        }
 
         SetupListener();
     }

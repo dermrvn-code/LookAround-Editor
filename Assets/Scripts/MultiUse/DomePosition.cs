@@ -21,11 +21,13 @@ public class DomePosition : MonoBehaviour
 
     void Update()
     {
-        if(position.x < 0){
-            position.x = 360+position.x;
+        if (position.x < 0)
+        {
+            position.x = 360 + position.x;
         }
-        if(position.y < 0){
-            position.y = 360+position.y;
+        if (position.y < 0)
+        {
+            position.y = 360 + position.y;
         }
         Vector3 cartesianPosition = PolarToCartesian(position);
         SetRectPosition(cartesianPosition);

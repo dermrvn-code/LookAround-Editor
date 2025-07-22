@@ -84,13 +84,21 @@ public class InteractionHandler : MonoBehaviour
             {
                 foreach (var element in elements)
                 {
-                    var leftOffset = (oldRotation - offset) % 360;
-                    var rightOffset = (oldRotation + offset) % 360;
-                    if (leftOffset > rightOffset)
+                    float elementX = element.Key.position.x;
+                    float min = (elementX - offset + 360) % 360;
+                    float max = (elementX + offset) % 360;
+
+                    bool isBetween;
+                    if (min < max)
                     {
-                        leftOffset = leftOffset - 360;
+                        isBetween = oldRotation >= min && oldRotation <= max;
                     }
-                    if (leftOffset < element.Key.position.x && element.Key.position.x < (oldRotation + offset) % 360)
+                    else
+                    {
+                        isBetween = oldRotation >= min || oldRotation <= max;
+                    }
+
+                    if (isBetween)
                     {
                         target = element.Value;
                         foundTarget = true;

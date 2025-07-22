@@ -71,14 +71,12 @@ public class SceneManager : MonoBehaviour
         }, () => // onComplete
         {
             Debug.Log("Textures preloaded!");
-            onComplete?.Invoke();
         }));
 
         foreach (var spritePath in spritePaths)
         {
             spriteManager.LoadSprite(spritePath.Key, spritePath.Value);
             loadingBar.IncreaseLoader(maxLoadingSteps, "Lädt Sprite: " + Path.GetFileName(spritePath.Value));
-            Debug.Log($"Loaded sprite: {spritePath.Value}");
         }
 
         foreach (var model in modelPaths)
@@ -88,7 +86,7 @@ public class SceneManager : MonoBehaviour
 
             try
             {
-                modelManager.LoadModel(modelPath, modelName, (GameObject obj, RenderTexture rt) =>
+                modelManager.LoadModel(modelPath, modelName, (GameObject obj, Texture2D rt) =>
                 {
                     loadingBar.IncreaseLoader(maxLoadingSteps, "Lädt Model: " + Path.GetFileName(modelPath));
                 });
@@ -193,9 +191,11 @@ public class SceneManager : MonoBehaviour
     void LoadModels(string scenesOverviewPath)
     {
         var modelsList = sceneOverview.Root.Element("Models");
+
         if (modelsList != null)
         {
             var models = modelsList.Descendants("Model");
+
             foreach (var model in models)
             {
                 string modelSource = model.Attribute("source").Value;
@@ -206,7 +206,7 @@ public class SceneManager : MonoBehaviour
                 if (File.Exists(modelPath))
                 {
                     modelPaths.Add(modelName, modelPath);
-                    return;
+                    continue;
                 }
                 Debug.LogWarning("Model file does not exist: " + modelPath);
             }
@@ -255,23 +255,16 @@ public class SceneManager : MonoBehaviour
             int x = int.Parse(element.Attribute("x").Value);
             int y = int.Parse(element.Attribute("y").Value);
 
-            int distance = 10;
-            if (element.Attribute("distance") != null)
-            {
-                distance = int.Parse(element.Attribute("distance").Value);
-            }
+            int distance = TryGetAttributeInt(element, "distance", 10);
 
-            int xRotationOffset = 0;
-            if (element.Attribute("xRotationOffset") != null)
-            {
-                xRotationOffset = int.Parse(element.Attribute("xRotationOffset").Value);
-            }
+
+            int xRotationOffset = TryGetAttributeInt(element, "xRotationOffset", 0);
 
 
             SceneElement se;
             if (elementType == "text")
             {
-                string action = element.Attribute("action").Value;
+                string action = TryGetAttributeString(element, "action", "");
                 se = new SceneElementText(
                     text: text,
                     x: x, y: y,
@@ -292,8 +285,9 @@ public class SceneManager : MonoBehaviour
             }
             else if (elementType == "directionarrow")
             {
-                string action = element.Attribute("action").Value;
-                int rotation = int.Parse(element.Attribute("rotation").Value);
+
+                string action = TryGetAttributeString(element, "action", "");
+                int rotation = TryGetAttributeInt(element, "rotation", 0);
 
                 string color = "";
                 if (element.Attribute("color") != null)
@@ -313,14 +307,24 @@ public class SceneManager : MonoBehaviour
             else if (elementType == "model")
             {
                 string name = element.Attribute("name").Value;
-                string action = element.Attribute("action").Value;
+
+                string action = TryGetAttributeString(element, "action", "");
+                int rotationX = TryGetAttributeInt(element, "rotationX", 0);
+                int rotationY = TryGetAttributeInt(element, "rotationY", 0);
+                int rotationZ = TryGetAttributeInt(element, "rotationZ", 0);
+                int scale = TryGetAttributeInt(element, "scale", 1);
+
 
                 se = new SceneElementModel(
                     modelName: name,
                     x: x, y: y,
                     distance: distance,
                     xRotationOffset: xRotationOffset,
-                    action: action
+                    action: action,
+                    xRotation: rotationX,
+                    yRotation: rotationY,
+                    zRotation: rotationZ,
+                    scale: scale
                 );
             }
             else
@@ -339,6 +343,33 @@ public class SceneManager : MonoBehaviour
 
         sceneList.Add(sceneName, sceneObj);
         return sceneObj;
+    }
+
+    float TryGetAttributeFloat(XElement element, string attributeName, float defaultValue)
+    {
+        if (element.Attribute(attributeName) != null)
+        {
+            return float.Parse(element.Attribute(attributeName).Value);
+        }
+        return defaultValue;
+    }
+
+    int TryGetAttributeInt(XElement element, string attributeName, int defaultValue)
+    {
+        if (element.Attribute(attributeName) != null)
+        {
+            return int.Parse(element.Attribute(attributeName).Value);
+        }
+        return defaultValue;
+    }
+
+    string TryGetAttributeString(XElement element, string attributeName, string defaultValue)
+    {
+        if (element.Attribute(attributeName) != null)
+        {
+            return element.Attribute(attributeName).Value;
+        }
+        return defaultValue;
     }
 
     public Scene GetStartScene()

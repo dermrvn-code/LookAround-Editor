@@ -14,10 +14,14 @@ public class ElementInitManager : MonoBehaviour
     private Dictionary<string, GameObject> prefabDictionary;
 
     SceneChanger sceneChanger;
+    ModelManager modelManager;
+    SpriteManager spriteManager;
 
     void Start()
     {
         sceneChanger = FindObjectOfType<SceneChanger>();
+        modelManager = FindObjectOfType<ModelManager>();
+        spriteManager = FindObjectOfType<SpriteManager>();
 
         foreach (Pairs.PrefabPair pair in prefabs)
         {
@@ -54,6 +58,7 @@ public class ElementInitManager : MonoBehaviour
         var color = new Color(Random.value, Random.value, Random.value);
         text.color = color;
         text.text = texts[Random.Range(0, texts.Length)];
+
 
 
         var dp = text.GetComponent<DomePosition>();
@@ -131,6 +136,41 @@ public class ElementInitManager : MonoBehaviour
 
         AddSceneElement(sceneElement);
         holder.sceneElement = sceneElement;
+    }
+
+    public void InitModel(float position)
+    {
+        string modelName = modelManager.GetFirstModel();
+
+        Debug.Log($"Model Name: {modelName}");
+        if (string.IsNullOrEmpty(modelName))
+        {
+            InfoText.ShowInfo("Kein Modell gefunden, bitte zuerst ein Modell zu Medien hinzufügen.");
+            return;
+        }
+
+        var dp = modelManager.DisplayModel(modelName).GetComponent<DomePosition>();
+
+        dp.position = new Vector2(position, 0);
+        dp.distance = 8;
+
+        var holder = dp.gameObject.AddComponent<SceneElementHolder>();
+
+        SceneElement sceneElement = new SceneElementModel
+        (
+            modelName: modelName ?? "model1",
+            x: (int)position,
+            y: 0,
+            distance: 8
+        );
+
+        AddSceneElement(sceneElement);
+        holder.sceneElement = sceneElement;
+    }
+
+    public void InitSprite(float position)
+    {
+
     }
 
     void AddSceneElement(SceneElement sceneElement)

@@ -7,7 +7,9 @@ public enum DragItemType
 {
     Text,
     Arrow,
-    Textbox
+    Textbox,
+    Model,
+    Sprite
 }
 public class UIDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {

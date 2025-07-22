@@ -34,7 +34,7 @@ public class ThumbnailMaker : MonoBehaviour
         }
     }
 
-    public RenderTexture CreateThumbnail(GameObject model)
+    public Texture2D CreateThumbnail(GameObject model)
     {
         ActivateStudio();
         PrepareModel(model);
@@ -47,7 +47,7 @@ public class ThumbnailMaker : MonoBehaviour
 
         ResetModel(model);
         DeactivateStudio();
-        return rt;
+        return ToTexture2D(rt);
     }
 
     Transform oldParent;
@@ -133,5 +133,17 @@ public class ThumbnailMaker : MonoBehaviour
         }
 
         model.SetActive(false);
+    }
+
+
+
+    Texture2D ToTexture2D(RenderTexture rTex)
+    {
+        Texture2D tex = new Texture2D(rTex.width, rTex.height, TextureFormat.RGB24, false);
+        // ReadPixels looks at the active RenderTexture.
+        RenderTexture.active = rTex;
+        tex.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
+        tex.Apply();
+        return tex;
     }
 }
