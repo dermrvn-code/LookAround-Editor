@@ -43,15 +43,15 @@ public class SceneManager : MonoBehaviour
         if (!File.Exists(sceneOverviewPath)) Debug.LogWarning("The scene overview file does not exist: " + sceneOverviewPath);
         sceneOverview = XDocument.Load(sceneOverviewPath);
 
-        try
-        {
-            LoadScenes(sceneOverviewPath);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error loading scene overview: " + e.Message);
-            return false;
-        }
+        // try
+        // {
+        LoadScenes(sceneOverviewPath);
+        // }
+        // catch (Exception e)
+        // {
+        //     Debug.LogError("Error loading scene overview: " + e.Message);
+        //     return false;
+        // }
 
         LoadLogos(sceneOverviewPath);
         LoadModels(sceneOverviewPath);
@@ -314,7 +314,6 @@ public class SceneManager : MonoBehaviour
                 int rotationZ = TryGetAttributeInt(element, "rotationZ", 0);
                 int scale = TryGetAttributeInt(element, "scale", 1);
 
-
                 se = new SceneElementModel(
                     modelName: name,
                     x: x, y: y,
@@ -327,6 +326,19 @@ public class SceneManager : MonoBehaviour
                     scale: scale
                 );
             }
+            else if (elementType == "sprite")
+            {
+                string path = TryGetAttributeString(element, "source", "");
+                int id = TryGetAttributeInt(element, "id", -1);
+
+                se = new SceneElementSprite(
+                    x: x, y: y,
+                    distance: distance,
+                    xRotationOffset: xRotationOffset,
+                    path: path,
+                    index: id
+                );
+            }
             else
             {
                 Debug.Log("Element doesnt match any type : " + elementType);
@@ -334,7 +346,8 @@ public class SceneManager : MonoBehaviour
             }
             if (se != null)
             {
-                se.id = idCounter;
+                Debug.Log("added scene element: " + se + " with id: " + idCounter);
+                se.list_id = idCounter;
                 sceneElements.Add(idCounter, se);
             }
             idCounter++;

@@ -78,6 +78,8 @@ public class ElementInitManager : MonoBehaviour
 
         AddSceneElement(sceneElement);
         holder.sceneElement = sceneElement;
+
+        sceneChanger.currentScene.HasUnsavedChanges = true;
     }
 
     public void InitArrow(float position)
@@ -106,6 +108,8 @@ public class ElementInitManager : MonoBehaviour
 
         AddSceneElement(sceneElement);
         holder.sceneElement = sceneElement;
+
+        sceneChanger.currentScene.HasUnsavedChanges = true;
     }
 
     public void InitTextbox(float position)
@@ -136,13 +140,14 @@ public class ElementInitManager : MonoBehaviour
 
         AddSceneElement(sceneElement);
         holder.sceneElement = sceneElement;
+
+        sceneChanger.currentScene.HasUnsavedChanges = true;
     }
 
     public void InitModel(float position)
     {
         string modelName = modelManager.GetFirstModel();
 
-        Debug.Log($"Model Name: {modelName}");
         if (string.IsNullOrEmpty(modelName))
         {
             InfoText.ShowInfo("Kein Modell gefunden, bitte zuerst ein Modell zu Medien hinzufügen.");
@@ -166,11 +171,36 @@ public class ElementInitManager : MonoBehaviour
 
         AddSceneElement(sceneElement);
         holder.sceneElement = sceneElement;
+
+        sceneChanger.currentScene.HasUnsavedChanges = true;
     }
 
     public void InitSprite(float position)
     {
+        InteractableSprite sprite = Instantiate(prefabDictionary["Sprite"], sceneElementsContainer.transform).GetComponent<InteractableSprite>();
+        sprite.id = 0;
+        sprite.texture = spriteManager.GetSprite(0);
 
+        var dp = sprite.GetComponent<DomePosition>();
+        dp.position = new Vector2(position, 0);
+        dp.distance = 4;
+
+        var holder = sprite.gameObject.AddComponent<SceneElementHolder>();
+
+        SceneElement sceneElement = new SceneElementSprite
+        (
+            x: (int)position,
+            y: 0,
+            distance: 8,
+            action: "toScene()",
+            index: 0,
+            path: spriteManager.GetPath(0)
+        );
+
+        AddSceneElement(sceneElement);
+        holder.sceneElement = sceneElement;
+
+        sceneChanger.currentScene.HasUnsavedChanges = true;
     }
 
     void AddSceneElement(SceneElement sceneElement)
@@ -188,7 +218,7 @@ public class ElementInitManager : MonoBehaviour
             maxKey = Mathf.Max(elements.Keys.ToArray());
         }
         int id = maxKey + 1;
-        sceneElement.id = id;
+        sceneElement.list_id = id;
         elements[id] = sceneElement;
     }
 }

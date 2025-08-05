@@ -1,7 +1,7 @@
 [System.Serializable]
 public abstract class SceneElement
 {
-    public int id;
+    public int list_id;
     public int x;
     public int y;
     public int distance;

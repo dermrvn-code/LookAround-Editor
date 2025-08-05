@@ -167,6 +167,8 @@ public class SceneSettings : MonoBehaviour
             return null;
         }
 
+        string relativeFilePath = filePath;
+
 
         if (sceneName != initialName)
         {

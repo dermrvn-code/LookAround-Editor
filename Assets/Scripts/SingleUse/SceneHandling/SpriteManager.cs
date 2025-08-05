@@ -60,6 +60,28 @@ public class SpriteManager : MonoBehaviour
         }));
     }
 
+    public Texture2D GetSprite(int index)
+    {
+        if (index < 0 || index >= sceneSprites.Length)
+        {
+            Debug.LogError("Index out of bounds for sceneSprites array.");
+            return null;
+        }
+
+        return sceneSprites[index].texture;
+    }
+
+    public string GetPath(int index)
+    {
+        if (index < 0 || index >= sceneSprites.Length)
+        {
+            Debug.LogError("Index out of bounds for sceneSprites array.");
+            return null;
+        }
+
+        return sceneSprites[index].path;
+    }
+
     public void UnloadSprite(int index)
     {
         if (index < 0 || index >= sceneSprites.Length)
@@ -70,26 +92,9 @@ public class SpriteManager : MonoBehaviour
         sceneSprites[index] = new SpriteData(string.Empty, null);
     }
 
-    public SpriteData[] GetAllSprites()
+    public SpriteData[] GetSceneSprites()
     {
-        SpriteData[] spriteDatas = new SpriteData[sceneSprites.Length + logos.Length];
-        for (int i = 0; i < sceneSprites.Length; i++)
-        {
-            if (sceneSprites[i].texture == null)
-            {
-                continue;
-            }
-            spriteDatas[i] = sceneSprites[i];
-        }
-        for (int i = 0; i < logos.Length; i++)
-        {
-            if (logos[i].spriteData.texture == null)
-            {
-                continue;
-            }
-            spriteDatas[sceneSprites.Length + i] = logos[i].spriteData;
-        }
-        return spriteDatas;
+        return sceneSprites;
     }
 
 

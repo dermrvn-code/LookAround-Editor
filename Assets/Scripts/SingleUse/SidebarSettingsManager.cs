@@ -95,6 +95,9 @@ public class SidebarSettingsManager : MonoBehaviour
             if (target.TryGetComponent(out InteractableModel model))
                 AddModel(model);
 
+            if (target.TryGetComponent(out InteractableSprite sprite))
+                AddSprite(sprite);
+
             if (target.TryGetComponent(out SceneElementHolder holder)) // always true, as functions checks target for SceneElementHolder
                 AddDeleteElement(holder);                              // maybe add other check later, it needed, for now every element can be deleted
 
@@ -143,7 +146,7 @@ public class SidebarSettingsManager : MonoBehaviour
                     modelManager.HideModel(modelName);
                 }
                 Destroy(holder.gameObject);
-                sceneChanger.currentScene.SceneElements.Remove(holder.sceneElement.id);
+                sceneChanger.currentScene.SceneElements.Remove(holder.sceneElement.list_id);
                 Deselect();
                 panelManager.CloseSidebar();
             });
@@ -338,6 +341,53 @@ public class SidebarSettingsManager : MonoBehaviour
             modelManager.SwitchModel(interactableModel.gameObject, modelName, value);
 
             sceneElement.modelName = value;
+            UpdateSceneElement(sceneElement);
+        });
+    }
+
+    public void AddSprite(InteractableSprite sprite)
+    {
+        SceneElementSprite sceneElement = (SceneElementSprite)sprite.GetComponent<SceneElementHolder>()?.sceneElement;
+
+
+        var group = Instantiate(prefabDictionary["Group"], sidebarContainer.transform);
+        var label = group.GetComponentInChildren<TMP_Text>();
+        var elementsContainer = group.transform.Find("Elements");
+        label.text = "Sprite Einstellungen";
+
+        var spriteSelector = Instantiate(prefabDictionary["SpriteSelector"], elementsContainer).GetComponent<SpriteSelector>();
+
+        var selectedSprite = (sprite.id + 1).ToString();
+
+        var allSprites = spriteManager.GetSceneSprites();
+
+        var spritePairs = new Pairs.SpritePair[allSprites.Length];
+
+        for (int i = 0; i < allSprites.Length; i++)
+        {
+            var currSprite = allSprites[i];
+            var displaySprite = currSprite.texture != null
+                ? Sprite.Create(currSprite.texture, new Rect(0, 0, currSprite.texture.width, currSprite.texture.height), new Vector2(0.5f, 0.5f))
+                : null;
+
+            if (displaySprite == null) continue;
+
+            spritePairs[i] = new Pairs.SpritePair { value = (i + 1).ToString(), sprite = displaySprite };
+        }
+
+        spriteSelector.Initialize(spritePairs, selectedSprite, "Sprite-Auswahl");
+
+
+        spriteSelector.OnElementSelected.AddListener(value =>
+        {
+            int id = int.Parse(value) - 1;
+
+            string newPath = spriteManager.GetSpritePaths()[id];
+            sprite.SetImage(spriteManager.GetSprite(id));
+            sprite.id = id;
+
+            sceneElement.index = id;
+            sceneElement.path = newPath;
             UpdateSceneElement(sceneElement);
         });
     }
@@ -555,15 +605,15 @@ public class SidebarSettingsManager : MonoBehaviour
 
     public void UpdateSceneElement(SceneElement sceneElement)
     {
-        if (sceneChanger.currentScene.SceneElements.ContainsKey(sceneElement.id))
+        if (sceneChanger.currentScene.SceneElements.ContainsKey(sceneElement.list_id))
         {
-            sceneChanger.currentScene.SceneElements[sceneElement.id] = sceneElement;
+            sceneChanger.currentScene.SceneElements[sceneElement.list_id] = sceneElement;
             sceneChanger.currentScene.HasUnsavedChanges = true;
             projectManager.unsavedChanges = true;
         }
         else
         {
-            Debug.LogError("SceneElement with ID " + sceneElement.id + " not found in current scene.");
+            Debug.LogError("SceneElement with ID " + sceneElement.list_id + " not found in current scene.");
             return;
         }
     }

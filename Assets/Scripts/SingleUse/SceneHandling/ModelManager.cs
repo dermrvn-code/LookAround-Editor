@@ -353,7 +353,7 @@ public class ModelManager : MonoBehaviour
             {
                 if (parent.GetComponent<InteractableModel>() != null)
                 {
-                    sceneChanger.currentScene.SceneElements.Remove(parent.GetComponent<SceneElementHolder>().sceneElement.id);
+                    sceneChanger.currentScene.SceneElements.Remove(parent.GetComponent<SceneElementHolder>().sceneElement.list_id);
                     Destroy(parent.gameObject);
                     break;
                 }

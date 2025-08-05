@@ -451,14 +451,18 @@ public class WorldSaver : MonoBehaviour
 
         var culture = CultureInfo.GetCultureInfo("de-DE");
         sceneElement.SetAttributeValue("name", scene.Name);
+
+        string sourcePath;
         if (!string.IsNullOrEmpty(newSource))
         {
-            sceneElement.SetAttributeValue("source", newSource);
+            sourcePath = newSource;
         }
         else
         {
-            sceneElement.SetAttributeValue("source", scene.Source);
+            sourcePath = scene.Source;
         }
+        string relativePath = Path.GetRelativePath(Path.Combine(projectManager.currentFolderPath, scene.Name), sourcePath);
+        sceneElement.SetAttributeValue("source", relativePath);
         sceneElement.SetAttributeValue("xOffset", scene.XOffset.ToString(culture));
         sceneElement.SetAttributeValue("yOffset", scene.YOffset.ToString(culture));
 
@@ -534,19 +538,19 @@ public class WorldSaver : MonoBehaviour
                 elementNode.SetAttributeValue("action", model.action);
                 Debug.Log($"Saving SceneElementModel: {model.modelName} at position ({model.x}, {model.y}) with distance {model.distance}");
             }
+            else if (element is SceneElementSprite)
+            {
+                elementNode.SetAttributeValue("type", "sprite");
+
+                SceneElementSprite sprite = (SceneElementSprite)element;
+                elementNode.SetAttributeValue("action", sprite.action);
+                elementNode.SetAttributeValue("id", sprite.index);
+                Debug.Log($"Saving SceneElementSprite: ID {sprite.index} at position ({sprite.x}, {sprite.y}) with distance {sprite.distance}");
+            }
             else
             {
                 Debug.Log("SceneElement of unknown type found: " + element.GetType());
             }
-            // else if (element is SceneElementSprite)
-            // {
-            //     elementNode.SetAttributeValue("type", "sprite");
-
-            //     SceneElementSprite sprite = (SceneElementSprite)element;
-            //     elementNode.SetAttributeValue("distance", sprite.distance.ToString());
-            //     elementNode.SetAttributeValue("action", sprite.action);
-            //     elementNode.SetAttributeValue("spriteName", sprite.spriteName);
-            // }
 
             sceneElement.Add(elementNode);
         }
