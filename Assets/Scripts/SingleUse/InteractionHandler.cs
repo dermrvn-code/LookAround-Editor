@@ -26,7 +26,7 @@ public class InteractionHandler : MonoBehaviour
         updateElementsNextFrame = false;
         elements = new Dictionary<DomePosition, Hoverable>();
         target = null;
-        var domeElements = FindObjectsOfType<DomePosition>();
+        var domeElements = FindObjectsByType<DomePosition>(FindObjectsSortMode.None);
         foreach (var domeElement in domeElements)
         {
             Hoverable elementToAdd;

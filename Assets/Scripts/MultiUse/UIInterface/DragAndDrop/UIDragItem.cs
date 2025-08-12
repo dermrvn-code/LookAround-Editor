@@ -56,7 +56,7 @@ public class UIDragItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
 
         if (!hoveringDropZone)
         {
-            foreach (var dropZone in FindObjectsOfType<UIDropZone>())
+            foreach (var dropZone in FindObjectsByType<UIDropZone>(FindObjectsSortMode.None))
                 dropZone.OnHoverExit();
         }
     }
