@@ -21,8 +21,8 @@ public class SceneTile : MonoBehaviour
 
     void Awake()
     {
-        sceneChanger = FindObjectOfType<SceneChanger>();
-        textureManager = FindObjectOfType<TextureManager>();
+        sceneChanger = FindFirstObjectByType<SceneChanger>();
+        textureManager = FindFirstObjectByType<TextureManager>();
         animator = GetComponent<Animator>();
 
         icon.SetActive(startScene);

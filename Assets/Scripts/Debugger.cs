@@ -22,8 +22,8 @@ public class Debugger : MonoBehaviour
     SceneChanger sceneChanger;
     void Start()
     {
-        sceneManager = FindObjectOfType<SceneManager>();
-        sceneChanger = FindObjectOfType<SceneChanger>();
+        sceneManager = FindFirstObjectByType<SceneManager>();
+        sceneChanger = FindFirstObjectByType<SceneChanger>();
     }
 
     // Update is called once per frame

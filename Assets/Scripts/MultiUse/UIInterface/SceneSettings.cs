@@ -25,10 +25,10 @@ public class SceneSettings : MonoBehaviour
 
     void Start()
     {
-        sceneManager = FindObjectOfType<SceneManager>();
-        sceneChanger = FindObjectOfType<SceneChanger>();
-        panelManager = FindObjectOfType<PanelManager>();
-        projectManager = FindObjectOfType<ProjectManager>();
+        sceneManager = FindFirstObjectByType<SceneManager>();
+        sceneChanger = FindFirstObjectByType<SceneChanger>();
+        panelManager = FindFirstObjectByType<PanelManager>();
+        projectManager = FindFirstObjectByType<ProjectManager>();
 
         xOffsetInput.OnValueChanged.AddListener((value) =>
         {

@@ -8,7 +8,7 @@ public class AppSettings : MonoBehaviour
     ProjectManager projectManager;
     void Start()
     {
-        projectManager = FindObjectOfType<ProjectManager>();
+        projectManager = FindFirstObjectByType<ProjectManager>();
     }
 
     public void Save()

@@ -11,10 +11,10 @@ public class UIDropZone : MonoBehaviour
     private void Start()
     {
         SetHintActive(false);
-        cam = FindObjectOfType<Camera>();
-        elementInitManager = FindObjectOfType<ElementInitManager>();
-        sceneChanger = FindObjectOfType<SceneChanger>();
-        interactionHandler = FindObjectOfType<InteractionHandler>();
+        cam = FindFirstObjectByType<Camera>();
+        elementInitManager = FindFirstObjectByType<ElementInitManager>();
+        sceneChanger = FindFirstObjectByType<SceneChanger>();
+        interactionHandler = FindFirstObjectByType<InteractionHandler>();
     }
 
     public void OnHoverEnter()

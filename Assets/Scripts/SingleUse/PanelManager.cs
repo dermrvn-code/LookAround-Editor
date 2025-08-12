@@ -42,9 +42,9 @@ public class PanelManager : MonoBehaviour
     void Start()
     {
         graphManager = graphPanel.GetComponent<GraphManager>();
-        sidebarSettingsManager = FindObjectOfType<SidebarSettingsManager>();
-        sceneManager = FindObjectOfType<SceneManager>();
-        projectManager = FindObjectOfType<ProjectManager>();
+        sidebarSettingsManager = FindFirstObjectByType<SidebarSettingsManager>();
+        sceneManager = FindFirstObjectByType<SceneManager>();
+        projectManager = FindFirstObjectByType<ProjectManager>();
 
         sideBarRectTransform = sideBar.GetComponent<RectTransform>();
         sideBarAnchorMin = sideBar.GetComponent<RectTransform>().anchorMin;

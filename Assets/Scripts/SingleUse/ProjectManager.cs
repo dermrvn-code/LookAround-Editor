@@ -38,10 +38,10 @@ public class ProjectManager : MonoBehaviour
 
     void Start()
     {
-        sceneManager = FindObjectOfType<SceneManager>();
-        sceneChanger = FindObjectOfType<SceneChanger>();
-        panelManager = FindObjectOfType<PanelManager>();
-        spriteManager = FindObjectOfType<SpriteManager>();
+        sceneManager = FindFirstObjectByType<SceneManager>();
+        sceneChanger = FindFirstObjectByType<SceneChanger>();
+        panelManager = FindFirstObjectByType<PanelManager>();
+        spriteManager = FindFirstObjectByType<SpriteManager>();
     }
 
     public bool IsInProject()

@@ -53,8 +53,8 @@ public class WorldListItem : MonoBehaviour
     WorldBundleManager worldBundleManager;
     void Awake()
     {
-        textureManager = FindObjectOfType<TextureManager>();
-        worldBundleManager = FindObjectOfType<WorldBundleManager>();
+        textureManager = FindFirstObjectByType<TextureManager>();
+        worldBundleManager = FindFirstObjectByType<WorldBundleManager>();
 
         backgroundImage = GetComponent<Image>();
         normalBackground = backgroundImage.color;

@@ -19,8 +19,8 @@ public class GraphManager : MonoBehaviour
 
     void Start()
     {
-        sceneManager = FindObjectOfType<SceneManager>();
-        textureManager = FindObjectOfType<TextureManager>();
+        sceneManager = FindFirstObjectByType<SceneManager>();
+        textureManager = FindFirstObjectByType<TextureManager>();
 
         RectTransform rectTransform = GetComponent<RectTransform>();
         Vector2 size = rectTransform != null ? rectTransform.rect.size : Vector2.zero;

@@ -35,7 +35,7 @@ public class ModelUploader : MonoBehaviour
 
     void Awake()
     {
-        modelManager = FindObjectOfType<ModelManager>();
+        modelManager = FindFirstObjectByType<ModelManager>();
 
         animator.SetBool("Open", false);
         label.text = labelText;

@@ -31,12 +31,12 @@ public class SidebarSettingsManager : MonoBehaviour
 
     void Start()
     {
-        panelManager = FindObjectOfType<PanelManager>();
-        sceneChanger = FindObjectOfType<SceneChanger>();
-        sceneManager = FindObjectOfType<SceneManager>();
-        projectManager = FindObjectOfType<ProjectManager>();
-        modelManager = FindObjectOfType<ModelManager>();
-        spriteManager = FindObjectOfType<SpriteManager>();
+        panelManager = FindFirstObjectByType<PanelManager>();
+        sceneChanger = FindFirstObjectByType<SceneChanger>();
+        sceneManager = FindFirstObjectByType<SceneManager>();
+        projectManager = FindFirstObjectByType<ProjectManager>();
+        modelManager = FindFirstObjectByType<ModelManager>();
+        spriteManager = FindFirstObjectByType<SpriteManager>();
 
         prefabDictionary = new Dictionary<string, GameObject>();
         foreach (var pair in prefabs)

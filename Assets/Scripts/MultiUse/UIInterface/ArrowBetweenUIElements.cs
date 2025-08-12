@@ -22,7 +22,7 @@ public class ArrowBetweenUIElements : MonoBehaviour
 
     void Start()
     {
-        panelManager = FindObjectOfType<PanelManager>();
+        panelManager = FindFirstObjectByType<PanelManager>();
         arrowRect = arrowImage.GetComponent<RectTransform>();
 
 

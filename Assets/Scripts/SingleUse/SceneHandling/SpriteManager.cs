@@ -42,7 +42,7 @@ public class SpriteManager : MonoBehaviour
 
     public void Awake()
     {
-        logoLoadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
+        logoLoadingOverlay = FindFirstObjectByType<LogoLoadingOverlay>();
         logoLoadingOverlay.Initialize(logoDefault, colorDefault);
     }
 

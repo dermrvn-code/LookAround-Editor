@@ -21,7 +21,7 @@ public class WorldSettings : MonoBehaviour
     ProjectManager projectManager;
     void Start()
     {
-        projectManager = FindObjectOfType<ProjectManager>();
+        projectManager = FindFirstObjectByType<ProjectManager>();
     }
 
     public void Save()

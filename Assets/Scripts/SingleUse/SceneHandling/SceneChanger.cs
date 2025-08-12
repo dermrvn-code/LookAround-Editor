@@ -35,13 +35,13 @@ public class SceneChanger : MonoBehaviour
 
     void Start()
     {
-        sm = FindObjectOfType<SceneManager>();
-        ih = FindObjectOfType<InteractionHandler>();
-        textureManager = FindObjectOfType<TextureManager>();
-        panelManager = FindObjectOfType<PanelManager>();
-        loadingOverlay = FindObjectOfType<LogoLoadingOverlay>();
-        modelManager = FindObjectOfType<ModelManager>();
-        spriteManager = FindObjectOfType<SpriteManager>();
+        sm = FindFirstObjectByType<SceneManager>();
+        ih = FindFirstObjectByType<InteractionHandler>();
+        textureManager = FindFirstObjectByType<TextureManager>();
+        panelManager = FindFirstObjectByType<PanelManager>();
+        loadingOverlay = FindFirstObjectByType<LogoLoadingOverlay>();
+        modelManager = FindFirstObjectByType<ModelManager>();
+        spriteManager = FindFirstObjectByType<SpriteManager>();
 
         // To prevent particles in the editor window
         particlesGameobject.SetActive(true);

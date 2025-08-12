@@ -20,10 +20,10 @@ public class SceneManager : MonoBehaviour
 
     void Start()
     {
-        sc = FindObjectOfType<SceneChanger>();
-        textureManager = FindObjectOfType<TextureManager>();
-        modelManager = FindObjectOfType<ModelManager>();
-        spriteManager = FindObjectOfType<SpriteManager>();
+        sc = FindFirstObjectByType<SceneChanger>();
+        textureManager = FindFirstObjectByType<TextureManager>();
+        modelManager = FindFirstObjectByType<ModelManager>();
+        spriteManager = FindFirstObjectByType<SpriteManager>();
 
         sc.ToMainScene();
     }

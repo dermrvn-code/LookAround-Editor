@@ -8,7 +8,7 @@ public class InputController : MonoBehaviour
 
     void Start()
     {
-        sc = FindObjectOfType<SceneChanger>();
+        sc = FindFirstObjectByType<SceneChanger>();
 
         if (cam == null)
             Debug.LogError("No camera was given in the Hardware Emulator");

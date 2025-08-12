@@ -27,9 +27,9 @@ public class WorldSaver : MonoBehaviour
     void Start()
     {
         sceneManager = GetComponent<SceneManager>();
-        projectManager = FindObjectOfType<ProjectManager>();
-        modelManager = FindObjectOfType<ModelManager>();
-        spriteManager = FindObjectOfType<SpriteManager>();
+        projectManager = FindFirstObjectByType<ProjectManager>();
+        modelManager = FindFirstObjectByType<ModelManager>();
+        spriteManager = FindFirstObjectByType<SpriteManager>();
     }
 
     public void Save()

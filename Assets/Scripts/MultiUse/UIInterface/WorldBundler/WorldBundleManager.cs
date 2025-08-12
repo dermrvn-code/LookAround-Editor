@@ -37,7 +37,7 @@ public class WorldBundleManager : MonoBehaviour
 
     void Start()
     {
-        projectManager = FindObjectOfType<ProjectManager>();
+        projectManager = FindFirstObjectByType<ProjectManager>();
 
         LoadWorldsFromProjectsFolder();
         ReloadWorldsDisplay();

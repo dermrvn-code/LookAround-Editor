@@ -48,8 +48,8 @@ public class ModelManager : MonoBehaviour
     SceneChanger sceneChanger;
     void Start()
     {
-        thumbnailMaker = FindObjectOfType<ThumbnailMaker>();
-        sceneChanger = FindObjectOfType<SceneChanger>();
+        thumbnailMaker = FindFirstObjectByType<ThumbnailMaker>();
+        sceneChanger = FindFirstObjectByType<SceneChanger>();
         if (domeRenderer == null)
         {
             Debug.LogWarning("No Renderer found on dome.");

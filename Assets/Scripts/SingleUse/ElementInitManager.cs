@@ -19,9 +19,9 @@ public class ElementInitManager : MonoBehaviour
 
     void Start()
     {
-        sceneChanger = FindObjectOfType<SceneChanger>();
-        modelManager = FindObjectOfType<ModelManager>();
-        spriteManager = FindObjectOfType<SpriteManager>();
+        sceneChanger = FindFirstObjectByType<SceneChanger>();
+        modelManager = FindFirstObjectByType<ModelManager>();
+        spriteManager = FindFirstObjectByType<SpriteManager>();
 
         foreach (Pairs.PrefabPair pair in prefabs)
         {
