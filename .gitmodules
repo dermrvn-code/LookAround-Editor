@@ -1,0 +1,3 @@
+[submodule "Assets/LookAroundCore"]
+	path = Assets/LookAroundCore
+	url = https://github.com/dermrvn-code/LookAroundCore
