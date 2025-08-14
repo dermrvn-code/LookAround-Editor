@@ -13,9 +13,9 @@ public class SceneChanger : SceneChangerBase
     PanelManager panelManager;
     [SerializeField] TMP_Text sceneNameText;
 
-    public override void Start()
+    public override void Awake()
     {
-        base.Start();
+        base.Awake();
         panelManager = FindFirstObjectByType<PanelManager>();
     }
     public override void ToMainScene()

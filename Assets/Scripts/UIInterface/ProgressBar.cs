@@ -12,7 +12,7 @@ public class ProgressBar : ProgressBarBase
     Image background;
     void Start()
     {
-        background = bar.GetComponent<Image>();
+        background = GetComponent<Image>();
     }
 
     public void SetActive(bool isActive)
