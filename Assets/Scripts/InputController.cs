@@ -28,9 +28,9 @@ public class InputController : MonoBehaviour
                 cam.RightMove();
 
             if (Input.GetKey(KeyCode.DownArrow))
-                cam.ZoomIn();
-            else if (Input.GetKey(KeyCode.UpArrow))
                 cam.ZoomOut();
+            else if (Input.GetKey(KeyCode.UpArrow))
+                cam.ZoomIn();
 
             if (Input.GetKeyDown(KeyCode.Space))
                 interaction.Interact();

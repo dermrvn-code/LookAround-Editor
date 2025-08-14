@@ -6,77 +6,20 @@ using Siccity.GLTFUtility;
 using UnityEngine.Events;
 using System.Linq;
 
-public struct Model
-{
-    public string name;
-    public string path;
-    public GameObject gameobject;
-    public Texture2D preview;
-
-    public bool used;
-
-    public Model(string name, string path, GameObject gameobject)
-    {
-        this.name = name;
-        this.path = path;
-        this.gameobject = gameobject;
-        preview = null;
-        used = false;
-    }
-}
-
 public class ModelManager : ModelManagerBase
 {
-    [SerializeField]
-    int maxModels = 3;
 
-    [SerializeField]
-    public Dictionary<string, Model> loadedModels = new Dictionary<string, Model>();
     public Dictionary<string, Model> previewModels = new Dictionary<string, Model>();
-
-    [SerializeField]
-    GameObject sceneElementsContainer;
-
-    [SerializeField]
-    GameObject siding;
-
-    [SerializeField]
-    Renderer domeRenderer;
-
 
     ThumbnailMaker thumbnailMaker;
     SceneChanger sceneChanger;
-    void Start()
+    public override void Start()
     {
+        base.Start();
         thumbnailMaker = FindFirstObjectByType<ThumbnailMaker>();
         sceneChanger = FindFirstObjectByType<SceneChanger>();
-        if (domeRenderer == null)
-        {
-            Debug.LogWarning("No Renderer found on dome.");
-        }
-
-        if (sceneElementsContainer == null)
-        {
-            Debug.LogWarning("sceneElementsContainer or dome is not assigned.");
-        }
     }
 
-    public string GetFirstModel()
-    {
-        foreach (var model in loadedModels.Values)
-        {
-            if (model.name != null && !model.used)
-            {
-                return model.name;
-            }
-        }
-        return null;
-    }
-
-    public int AmountOfModels()
-    {
-        return loadedModels.Count + previewModels.Count;
-    }
 
     public List<Model> GetAllModels()
     {
@@ -117,29 +60,6 @@ public class ModelManager : ModelManagerBase
 
 
 
-    [SerializeField]
-    InteractableModel containerPrefab;
-    public GameObject DisplayModel(string modelName)
-    {
-        if (!loadedModels.TryGetValue(modelName, out Model model))
-        {
-            Debug.LogWarning("Model not found in loaded models: " + modelName);
-        }
-
-        if (model.gameobject != null)
-        {
-            var container = Instantiate(containerPrefab, sceneElementsContainer.transform);
-
-            var animContainer = container.GetComponent<InteractableModel>().elementContainer;
-            model.gameobject.SetActive(true);
-            model.gameobject.transform.SetParent(animContainer.transform, false);
-
-            SetUsed(modelName);
-            return container.gameObject;
-        }
-        return null;
-    }
-
 
 
     public void SwitchModel(GameObject container, string oldModelName, string newModelName)
@@ -162,80 +82,44 @@ public class ModelManager : ModelManagerBase
 
     }
 
-    public void HideModel(string modelName)
+    public override void HideModel(string modelName)
     {
-        if (loadedModels.TryGetValue(modelName, out Model model))
+        base.HideModel(modelName);
+        SetUsed(modelName, false);
+    }
+
+    public bool preview;
+    public override void OnModelLoaded(string modelName, GameObject result, string filePath, UnityAction<GameObject, Texture2D> onLoaded = null)
+    {
+
+
+        if (!preview)
         {
-            model.gameobject.transform.SetParent(siding.transform, false);
-            model.gameobject.SetActive(false);
-            SetUsed(modelName, false);
+            IntegrateModel(modelName, result, filePath);
+            preview = false;
+        }
+        else
+        {
+            PreviewModel(modelName, result, filePath);
+        }
+
+        Texture2D rt = CreateThumbnail(result, modelName);
+        if (rt == null)
+        {
+            Debug.LogError("Failed to create thumbnail for model: " + modelName);
             return;
         }
 
-        Debug.LogWarning("Model not found in loaded models: " + modelName);
-    }
-
-    public void HideAllModels(string exceptModelName = null)
-    {
-        var models = GetAllModels();
-        foreach (var model in models)
+        IEnumerator Delay()
         {
-            if (model.name != exceptModelName && model.gameobject != null)
+            yield return new WaitForSeconds(1.5f);
+            if (onLoaded != null)
             {
-                model.gameobject.transform.SetParent(siding.transform, false);
-                model.gameobject.SetActive(false);
-                SetUsed(model.name, false);
+                onLoaded?.Invoke(result, rt);
             }
         }
-    }
 
-    public void LoadModel(string filepath, string modelName, UnityAction<GameObject, Texture2D> onLoaded = null, bool preview = false)
-    {
-        Importer.ImportGLTFAsync(filepath, new ImportSettings(), (GameObject result, AnimationClip[] clips) =>
-        {
-            foreach (var meshFilter in result.GetComponentsInChildren<MeshFilter>())
-            {
-                var collider = meshFilter.gameObject.AddComponent<MeshCollider>();
-                collider.sharedMesh = meshFilter.sharedMesh;
-            }
-            ;
-            if (loadedModels.ContainsKey(modelName) || previewModels.ContainsKey(modelName))
-            {
-                Debug.LogWarning($"Model {modelName} already found in loaded models");
-                return;
-            }
-
-            result.name = modelName;
-            NormalizeModel(result);
-
-
-            if (!preview)
-            {
-                IntegrateModel(modelName, result, filepath);
-            }
-            else
-            {
-                PreviewModel(modelName, result, filepath);
-            }
-
-            Texture2D rt = CreateThumbnail(result, modelName, preview);
-            if (rt == null)
-            {
-                Debug.LogError("Failed to create thumbnail for model: " + modelName);
-                return;
-            }
-
-            IEnumerator Delay()
-            {
-                yield return new WaitForSeconds(1.5f);
-                if (onLoaded != null)
-                {
-                    onLoaded.Invoke(result, rt);
-                }
-            }
-
-            StartCoroutine(Delay());
-        });
+        StartCoroutine(Delay());
     }
 
     public Texture2D GetThumbnail(string modelName)
@@ -251,7 +135,7 @@ public class ModelManager : ModelManagerBase
         return null;
     }
 
-    Texture2D CreateThumbnail(GameObject gameObject, string modelName, bool preview = false)
+    Texture2D CreateThumbnail(GameObject gameObject, string modelName)
     {
         Texture2D rt = thumbnailMaker.CreateThumbnail(gameObject);
         if (rt != null)
@@ -294,7 +178,10 @@ public class ModelManager : ModelManagerBase
 
         if (loadedModels.ContainsKey(newModelName))
         {
-            UnloadModel(newModelName);
+            UnloadModel(newModelName, (model) =>
+            {
+                UnloadParentElement(model);
+            });
         }
 
         if (loadedModels.Count >= maxModels)
@@ -326,25 +213,7 @@ public class ModelManager : ModelManagerBase
         }
     }
 
-    public void UnloadModel(string modelName)
-    {
-        if (loadedModels.ContainsKey(modelName))
-        {
-            loadedModels.TryGetValue(modelName, out Model model);
-            loadedModels.Remove(modelName);
-
-            if (model.gameobject != null)
-            {
-                UnloadParentElement(model);
-                Destroy(model.gameobject);
-            }
-
-            return;
-        }
-        Debug.LogWarning("Model not found in loaded models: " + modelName);
-    }
-
-    void UnloadParentElement(Model model)
+    public void UnloadParentElement(Model model)
     {
         if (model.gameobject != null)
         {
@@ -360,77 +229,6 @@ public class ModelManager : ModelManagerBase
                 parent = parent.parent;
             }
         }
-    }
-
-    public string[] GetModelNames(int? maxModels = null)
-    {
-        return loadedModels.Keys.Take(maxModels.GetValueOrDefault(this.maxModels)).ToArray();
-    }
-
-    float realismFactor = 0.2f;
-    void NormalizeModel(GameObject model)
-    {
-        model.transform.localPosition = Vector3.zero;
-        model.transform.localRotation = Quaternion.identity;
-
-        Renderer resultRenderer = model.GetComponent<Renderer>();
-        if (resultRenderer == null)
-        {
-            resultRenderer = model.GetComponentInChildren<Renderer>();
-        }
-
-        if (resultRenderer == null)
-        {
-            Debug.LogWarning("No Renderer found on result to calculate size.");
-            return;
-        }
-
-        Bounds meshBounds = new Bounds();
-        bool hasBounds = false;
-        foreach (var meshFilter in model.GetComponentsInChildren<MeshFilter>())
-        {
-            if (meshFilter.sharedMesh != null)
-            {
-                if (!hasBounds)
-                {
-                    meshBounds = meshFilter.sharedMesh.bounds;
-                    meshBounds.center = meshFilter.transform.TransformPoint(meshBounds.center);
-                    hasBounds = true;
-                }
-                else
-                {
-                    Bounds transformedBounds = meshFilter.sharedMesh.bounds;
-                    transformedBounds.center = meshFilter.transform.TransformPoint(transformedBounds.center);
-                    meshBounds.Encapsulate(transformedBounds);
-                }
-            }
-        }
-        Vector3 resultSize = hasBounds ? meshBounds.size : Vector3.zero;
-        Vector3 domeSize = domeRenderer.bounds.size;
-
-        float resultMax = Mathf.Max(resultSize.x, resultSize.y, resultSize.z);
-
-        if (resultMax == 0)
-        {
-            Debug.LogWarning("Result size is zero, cannot scale.");
-            return;
-        }
-
-        float scaleFactor;
-        if (resultMax == resultSize.x)
-        {
-            scaleFactor = domeSize.x / resultMax;
-        }
-        else if (resultMax == resultSize.y)
-        {
-            scaleFactor = domeSize.y / resultMax;
-        }
-        else
-        {
-            scaleFactor = domeSize.z / resultMax;
-        }
-        scaleFactor = scaleFactor * realismFactor; // realistic scaling
-        model.transform.localScale = Vector3.one * scaleFactor;
     }
 
     void PreviewModel(string modelName, GameObject result, string filepath)
@@ -455,37 +253,9 @@ public class ModelManager : ModelManagerBase
         previewModels.Add(modelName, model);
     }
 
-    void IntegrateModel(string modelName, GameObject result, string filepath)
+
+    public override void UnloadAllModels()
     {
-        if (loadedModels.Count >= maxModels)
-        {
-            Debug.LogWarning("Maximum number of models loaded. Cannot load more.");
-            return;
-        }
-
-        if (loadedModels.ContainsKey(modelName))
-        {
-            Debug.LogWarning("Model already loaded: " + result.name);
-            return;
-        }
-
-        result.transform.SetParent(siding.transform, false);
-        result.gameObject.SetActive(false);
-
-        Model model = new Model(modelName, filepath, result);
-
-        loadedModels.Add(modelName, model);
-    }
-
-    public void UnloadAllModels()
-    {
-        foreach (var model in loadedModels.Values)
-        {
-            if (model.gameobject != null)
-            {
-                Destroy(model.gameobject);
-            }
-        }
         foreach (var model in previewModels.Values)
         {
             if (model.gameobject != null)
@@ -493,16 +263,9 @@ public class ModelManager : ModelManagerBase
                 Destroy(model.gameobject);
             }
         }
-
-        loadedModels.Clear();
         previewModels.Clear();
 
-        Debug.Log("All models unloaded.");
-    }
-
-    void OnDestroy()
-    {
-        UnloadAllModels();
+        base.UnloadAllModels();
     }
 
 }

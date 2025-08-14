@@ -50,7 +50,10 @@ public class MediaSettings : MonoBehaviour
             var modelInput = models[i];
             if (string.IsNullOrEmpty(modelInput.modelName))
             {
-                modelManager.UnloadModel("model" + (i + 1));
+                modelManager.UnloadModel("model" + (i + 1), (model) =>
+            {
+                modelManager.UnloadParentElement(model);
+            });
                 continue;
             }
             if (!modelInput.changedSinceInitialization)

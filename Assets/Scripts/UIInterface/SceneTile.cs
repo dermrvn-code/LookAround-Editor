@@ -75,6 +75,7 @@ public class SceneTile : MonoBehaviour
 
     void OnClick()
     {
+        sceneChanger.closeSidebar = true;
         sceneChanger.SwitchSceneAnimation(scene);
     }
 

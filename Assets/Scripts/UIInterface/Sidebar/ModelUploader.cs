@@ -81,6 +81,7 @@ public class ModelUploader : MonoBehaviour
         if (preview)
         {
             ProcessIndicator.Show();
+            modelManager.preview = true;
             modelManager.LoadModel(path, modelName, onLoaded: (GameObject obj, Texture2D rt) =>
             {
                 DisplayTexture(rt);
@@ -88,7 +89,7 @@ public class ModelUploader : MonoBehaviour
                 changedSinceInitialization = true;
                 value = path;
                 ProcessIndicator.Hide();
-            }, preview: true);
+            });
         }
         else
         {

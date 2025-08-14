@@ -21,7 +21,7 @@ public class ProjectManager : MonoBehaviour
 
     private bool isInProject = false;
 
-    public Loader loader;
+    public ProgressBar progressBar;
 
     public TMP_Text projectNameText;
     public TMP_Text sceneNameText;
@@ -40,6 +40,7 @@ public class ProjectManager : MonoBehaviour
     {
         sceneManager = FindFirstObjectByType<SceneManager>();
         sceneChanger = FindFirstObjectByType<SceneChanger>();
+        progressBar = FindFirstObjectByType<ProgressBar>();
         panelManager = FindFirstObjectByType<PanelManager>();
         spriteManager = FindFirstObjectByType<SpriteManager>();
     }
@@ -154,14 +155,14 @@ public class ProjectManager : MonoBehaviour
         var folderName = Path.GetFileName(currentFolderPath);
         currentProjectName = CaseToSpace(folderName);
         currentSceneOverview = path;
-        loader.gameObject.SetActive(true);
+        progressBar.SetActive(true);
         sceneManager.LoadScenesOverview(path, () =>
         {
             projectNameText.text = currentProjectName;
             panelManager.UpdateSceneList();
             sceneChanger.ToStartScene();
             panelManager.SwitchToScene();
-            loader.gameObject.SetActive(false);
+            progressBar.SetActive(false);
             isInProject = true;
         });
 

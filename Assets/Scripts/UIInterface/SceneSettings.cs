@@ -81,6 +81,7 @@ public class SceneSettings : MonoBehaviour
 
                 if (sceneChanger.currentScene.Name == initialName)
                 {
+                    sceneChanger.closeSidebar = false;
                     sceneChanger.SwitchSceneAnimation(sceneManager.GetStartScene());
                 }
                 panelManager.UpdateSceneList();
@@ -205,7 +206,8 @@ public class SceneSettings : MonoBehaviour
         if (scene != null)
         {
             InfoText.ShowInfo("Szeneneinstellungen gespeichert.");
-            sceneChanger.SwitchSceneAnimation(scene, closeSidebar: false, forceReload: true);
+            sceneChanger.closeSidebar = false;
+            sceneChanger.SwitchSceneAnimation(scene);
         }
     }
 
