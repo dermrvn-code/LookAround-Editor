@@ -1,0 +1,9 @@
+{
+  "name": "LookAround-Editor",
+  "references": [
+    "LookAroundCore.Runtime",
+    "Unity.TextMeshPro",
+    "Siccity.GLTFUtility"
+  ],
+  "autoReferenced": true
+}
