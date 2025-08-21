@@ -16,12 +16,14 @@ public class ElementInitManager : MonoBehaviour
     SceneChanger sceneChanger;
     ModelManager modelManager;
     SpriteManager spriteManager;
+    PuzzleManager puzzleManager;
 
     void Start()
     {
         sceneChanger = FindFirstObjectByType<SceneChanger>();
         modelManager = FindFirstObjectByType<ModelManager>();
         spriteManager = FindFirstObjectByType<SpriteManager>();
+        puzzleManager = FindFirstObjectByType<PuzzleManager>();
 
         foreach (Pairs.PrefabPair pair in prefabs)
         {
@@ -195,6 +197,35 @@ public class ElementInitManager : MonoBehaviour
             action: "toScene()",
             index: 0,
             path: spriteManager.GetPath(0)
+        );
+
+        AddSceneElement(sceneElement);
+        holder.sceneElement = sceneElement;
+
+        sceneChanger.currentScene.HasUnsavedChanges = true;
+    }
+
+    public void InitPuzzle(float position)
+    {
+        if (!puzzleManager.isEnabled)
+        {
+            InfoText.ShowInfo("Puzzle ist nicht aktiviert.");
+            return;
+        }
+        InteractablePuzzle puzzle = Instantiate(prefabDictionary["PuzzlePlaceholder"], sceneElementsContainer.transform).GetComponent<InteractablePuzzle>();
+
+        var dp = puzzle.GetComponent<DomePosition>();
+        dp.position = new Vector2(position, 0);
+        dp.distance = 4;
+
+        var holder = puzzle.gameObject.AddComponent<SceneElementHolder>();
+
+        SceneElement sceneElement = new SceneElementPuzzle
+        (
+            x: (int)position,
+            y: 0,
+            distance: 8,
+            index: 0
         );
 
         AddSceneElement(sceneElement);

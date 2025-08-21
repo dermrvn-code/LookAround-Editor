@@ -154,6 +154,18 @@ public class PanelManager : MonoBehaviour
         }
     }
 
+    public void OpenGameSettings()
+    {
+        if (projectManager.IsInProject())
+        {
+            sidebarSettingsManager.OpenGameSettings();
+        }
+        else
+        {
+            InfoText.ShowInfo("Lade ein Projekt, um die Spieleeinstellungen zu bearbeiten.");
+        }
+    }
+
     public void OpenAppSetings()
     {
         sidebarSettingsManager.OpenAppSettings();

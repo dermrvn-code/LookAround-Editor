@@ -56,13 +56,13 @@ public class SpriteSelector : MonoBehaviour
             if (value == selectedValue)
             {
                 SelectElement(value, newItem);
+                value = selectedValue;
             }
         }
         OnElementSelected?.AddListener((value) =>
         {
             this.value = value;
         });
-        value = selectedValue;
     }
 
     void SelectElement(string value, GameObject selectedItem)

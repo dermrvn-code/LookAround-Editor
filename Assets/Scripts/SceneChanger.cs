@@ -24,8 +24,6 @@ public class SceneChanger : SceneChangerBase
         base.ToMainScene();
     }
 
-
-
     public bool closeSidebar = false;
     public override void SwitchScene(Scene scene, Action onLoaded = null)
     {
@@ -110,8 +108,15 @@ public class SceneChanger : SceneChangerBase
     public override GameObject LoadSprite(SceneElementSprite sceneElement)
     {
         var sprite = base.LoadSprite(sceneElement);
-        sprite.gameObject.AddComponent<SceneElementHolder>().sceneElement = sceneElement;
+        sprite.AddComponent<SceneElementHolder>().sceneElement = sceneElement;
         return sprite;
+    }
+
+    public override GameObject LoadPuzzlePiece(SceneElementPuzzle sceneElement, bool placeholder = true)
+    {
+        var piece = base.LoadPuzzlePiece(sceneElement, true);
+        if (piece != null) piece.AddComponent<SceneElementHolder>().sceneElement = sceneElement;
+        return piece;
     }
 
 

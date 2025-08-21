@@ -24,12 +24,14 @@ public class WorldSaver : MonoBehaviour
     ProjectManager projectManager;
     ModelManager modelManager;
     SpriteManager spriteManager;
+    PuzzleManager puzzleManager;
     void Start()
     {
         sceneManager = GetComponent<SceneManager>();
         projectManager = FindFirstObjectByType<ProjectManager>();
         modelManager = FindFirstObjectByType<ModelManager>();
         spriteManager = FindFirstObjectByType<SpriteManager>();
+        puzzleManager = FindFirstObjectByType<PuzzleManager>();
     }
 
     public void Save()
@@ -106,14 +108,16 @@ public class WorldSaver : MonoBehaviour
         foreach (var modelName in modelManager.GetModelNames())
         {
             var modelPath = modelManager.GetModelPath(modelName);
+
             if (string.IsNullOrEmpty(modelPath) || !File.Exists(modelPath))
             {
                 Debug.LogWarning($"Model path for {modelName} is empty or does not exist.");
                 continue;
             }
 
+            string fileName = Path.GetFileName(modelPath);
             string modelSourceFolder = Path.GetDirectoryName(modelPath);
-            string destModelFolder = Path.Combine(mediaFolder, "models", modelName);
+            string destModelFolder = Path.Combine(mediaFolder, "models", modelName, fileName);
 
             modelsUpdated = DirectoryCopyRecurse(modelSourceFolder, destModelFolder);
         }
@@ -140,10 +144,17 @@ public class WorldSaver : MonoBehaviour
         {
             return false; // No need to copy if source and destination are the same
         }
+
+        if (File.Exists(destPath))
+        {
+            destPath = Path.GetDirectoryName(destPath);
+        }
         if (!Directory.Exists(destPath))
         {
             Directory.CreateDirectory(destPath);
         }
+
+
 
         foreach (string filePath in Directory.GetFiles(sourcePath))
         {
@@ -394,6 +405,16 @@ public class WorldSaver : MonoBehaviour
             }
         }
 
+        if (puzzleManager.isEnabled)
+        {
+            XElement puzzleElement = new XElement("Minigame");
+            puzzleElement.SetAttributeValue("name", "puzzle");
+            puzzleElement.SetAttributeValue("sprite", puzzleManager.mainTexId.ToString());
+            puzzleElement.SetAttributeValue("pieces", puzzleManager.totalPieces.ToString());
+            puzzleElement.SetAttributeValue("finished", puzzleManager.finishedAction);
+            root.Add(puzzleElement);
+        }
+
 
         // METADATA
         XElement metaData = new XElement("MetaData");
@@ -546,6 +567,13 @@ public class WorldSaver : MonoBehaviour
                 elementNode.SetAttributeValue("action", sprite.action);
                 elementNode.SetAttributeValue("id", sprite.index);
                 Debug.Log($"Saving SceneElementSprite: ID {sprite.index} at position ({sprite.x}, {sprite.y}) with distance {sprite.distance}");
+            }
+            else if (element is SceneElementPuzzle)
+            {
+                elementNode.SetAttributeValue("type", "puzzlepiece");
+
+                SceneElementPuzzle sprite = (SceneElementPuzzle)element;
+                Debug.Log($"Saving PuzzlePiece at position ({sprite.x}, {sprite.y}) with distance {sprite.distance}");
             }
             else
             {

@@ -61,6 +61,7 @@ public class MediaSettings : MonoBehaviour
                 continue;
             }
 
+            projectManager.unsavedChanges = true;
             modelManager.StorePreviewModel(modelInput.modelName);
         }
 

@@ -65,6 +65,9 @@ public class UIDropZone : MonoBehaviour
             case DragItemType.Sprite:
                 elementInitManager.InitSprite(pos);
                 break;
+            case DragItemType.Puzzle:
+                elementInitManager.InitPuzzle(pos);
+                break;
             default:
                 Debug.LogWarning("Unknown item type dropped");
                 break;
