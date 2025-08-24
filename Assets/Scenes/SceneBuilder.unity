@@ -4536,6 +4536,10 @@ MonoBehaviour:
   arrowPrefab: {fileID: 5989287706789979100, guid: 3aca67b27b11d8b4c936073b6893335d, type: 3}
   spritePrefab: {fileID: 3679028047257136394, guid: d43ae49a8e655b949ace98934c6c3cf5, type: 3}
   puzzlePiecePrefab: {fileID: 3679028047257136394, guid: 1c96e6752da0690439eba6b9cdea29cc, type: 3}
+  info: {fileID: 21300000, guid: dd768700f43de964785ecbb279a6b0de, type: 3}
+  warning: {fileID: 21300000, guid: 71a40a1d3416f704d9c628ee99efab44, type: 3}
+  question: {fileID: 21300000, guid: a865d2b0708c7274e86906714a52273c, type: 3}
+  play: {fileID: 21300000, guid: f118270c8165ed14fbaaecf63ec48ef4, type: 3}
   sceneNameText: {fileID: 245948485}
   closeSidebar: 0
 --- !u!114 &563261374
@@ -5619,6 +5623,58 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 9099030779244102617, guid: 5535b488f8a320f48b1b36b0219f6e55, type: 3}
   m_PrefabInstance: {fileID: 203369872}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &794890683
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 794890685}
+  - component: {fileID: 794890684}
+  m_Layer: 0
+  m_Name: Debug
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &794890684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 794890683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63fd454fdbd4409499b3d152bbae3925, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scene:
+    _type: 0
+    _name: 
+    _source: 
+    _isStartScene: 0
+    _xOffset: 0
+    _yOffset: 0
+  sceneElements: []
+--- !u!4 &794890685
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 794890683}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.62291, y: 0, z: 4.94086}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &801376975
 GameObject:
   m_ObjectHideFlags: 0
@@ -14253,3 +14309,4 @@ SceneRoots:
   - {fileID: 1253902843}
   - {fileID: 1150417624}
   - {fileID: 203369872}
+  - {fileID: 794890685}

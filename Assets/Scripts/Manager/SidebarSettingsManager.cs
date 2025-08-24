@@ -229,7 +229,8 @@ public class SidebarSettingsManager : MonoBehaviour
         {
             if (spriteDictionary.ContainsKey(value))
             {
-                textbox.SetIcon(spriteDictionary[value], value);
+                textbox.SetIcon(spriteDictionary[value]);
+                textbox.iconName = value;
                 if (sceneElement != null)
                 {
                     sceneElement.icon = value;
